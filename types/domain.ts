@@ -1,6 +1,7 @@
 export type LinkAction =
   | { type: 'internal'; href: string; label: string }
   | { type: 'external'; href: string; label: string }
+  | { type: 'command'; command: 'open-discovery'; label: string }
   | { type: 'unavailable'; label: string; reason?: string };
 
 export type MapMode = 'beginner' | 'technical';
@@ -105,6 +106,25 @@ export interface KnowledgeArticleRecord {
   relatedNodeIds?: string[];
 }
 
+export interface GlossarySourceReference {
+  label: string;
+  href: string;
+}
+
+export interface GlossaryTermRecord {
+  id: string;
+  slug: string;
+  term: string;
+  tag: string;
+  summary: string;
+  aliases: string[];
+  keywords: string[];
+  priority: MapNodePriority;
+  source: GlossarySourceReference;
+  relatedCategoryIds?: string[];
+  relatedNodeIds?: string[];
+}
+
 export interface LiveStatusIndicator {
   status: string;
   text: string;
@@ -185,4 +205,20 @@ export interface MapCanvasEdgeData {
   relationKind: MapEdgeDefinition['relationKind'];
   beginnerCaption?: string;
   technicalCaption?: string;
+}
+
+export type DiscoveryItemKind = 'core' | 'project' | 'category' | 'article' | 'glossary';
+
+export interface DiscoveryItem {
+  id: string;
+  kind: DiscoveryItemKind;
+  title: string;
+  tag: string;
+  eyebrow: string;
+  summary: string;
+  keywords: string[];
+  href: string;
+  priority: MapNodePriority;
+  secondaryAction?: LinkAction;
+  featured?: boolean;
 }

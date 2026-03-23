@@ -1,6 +1,6 @@
 'use client';
 import type { MouseEvent as ReactMouseEvent } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -38,6 +38,7 @@ export interface EcosystemMapProps {
   ui: UIConfig;
   variant?: MapVariant;
   defaultMode?: MapMode;
+  initialFocusNodeId?: string | null;
 }
 
 function isDomainNodeData(data: MapCanvasNodeData): data is MapNodeDefinition & { color: string } {
@@ -52,6 +53,7 @@ function MapInternal({
   ui,
   variant = 'full',
   defaultMode = 'beginner',
+  initialFocusNodeId = null,
 }: EcosystemMapProps) {
   const shouldReduceMotion = useReducedMotion();
   const { fitBounds, setCenter } = useReactFlow();
@@ -60,6 +62,7 @@ function MapInternal({
   const [activeNode, setActiveNode] = useState<MapNodeDefinition | null>(null);
   const [focusedCategory, setFocusedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const lastFocusedNodeRef = useRef<string | null>(null);
 
   const initialNodes = useMemo(
     () => generateReactFlowNodes(domainNodes, sceneConfig, mapCategories),
@@ -150,6 +153,36 @@ function MapInternal({
     setActiveNode(projectNode);
     setSearchQuery('');
   }, [executeFocus]);
+
+  useEffect(() => {
+    if (!initialFocusNodeId) {
+      lastFocusedNodeRef.current = null;
+      return;
+    }
+
+    if (lastFocusedNodeRef.current === initialFocusNodeId) {
+      return;
+    }
+
+    const targetNode = domainNodes.find((node) => node.id === initialFocusNodeId);
+
+    if (!targetNode) {
+      return;
+    }
+
+    lastFocusedNodeRef.current = initialFocusNodeId;
+
+    if (targetNode.kind === 'category') {
+      executeFocus(targetNode.id);
+    } else if (targetNode.kind === 'project' && targetNode.categoryId) {
+      executeFocus(targetNode.categoryId);
+    } else {
+      executeFocus(null);
+    }
+
+    setActiveNode(targetNode);
+    setSearchQuery('');
+  }, [domainNodes, executeFocus, initialFocusNodeId]);
 
   const searchResults = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();

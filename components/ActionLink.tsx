@@ -1,6 +1,9 @@
+'use client';
+
 import Link from 'next/link';
 import { ReactNode } from 'react';
 import { LinkAction } from '../types/domain';
+import { useDiscovery } from './DiscoveryShell';
 
 interface ActionLinkProps {
   action: LinkAction;
@@ -15,6 +18,8 @@ export default function ActionLink({
   className = '',
   unavailableClassName,
 }: ActionLinkProps) {
+  const { openDiscovery } = useDiscovery();
+
   if (action.type === 'internal') {
     return (
       <Link href={action.href} className={className}>
@@ -33,6 +38,19 @@ export default function ActionLink({
       >
         {children}
       </a>
+    );
+  }
+
+  if (action.type === 'command') {
+    return (
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        onClick={(event) => openDiscovery(event.currentTarget)}
+        className={`appearance-none border-0 bg-transparent p-0 text-left ${className}`}
+      >
+        {children}
+      </button>
     );
   }
 

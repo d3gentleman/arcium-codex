@@ -11,7 +11,7 @@ import {
 export const navLinks: LinkAction[] = [
   { type: 'internal', label: "Map", href: "/map" },
   { type: 'internal', label: "Encyclopedia", href: "/encyclopedia" },
-  { type: 'unavailable', label: "Glossary", reason: "Glossary pages are not published yet." },
+  { type: 'internal', label: "Glossary", href: "/glossary" },
   { type: 'unavailable', label: "Infrastructure", reason: "Infrastructure guides are not published yet." },
   { type: 'unavailable', label: "About", reason: "About page is not published yet." },
 ];
@@ -75,15 +75,15 @@ export const homepageBlocks: HomepageBlocks = {
     subtitle: "Core Functionality: Exploration",
     titleLine1: "NAVIGATE THE",
     titleLine2: "ECOSYSTEM_ATLAS",
-    description: "Mapping out the Arcium ecosystem. Discover the projects, applications, and networks secured by Multi-Party Computation.",
+    description: "Explore the builders, guides, and private computation concepts that make the Arcium network legible.",
     primaryCta: { type: 'internal', label: "Launch Atlas Matrix", href: "/map" },
-    secondaryCta: { type: 'unavailable', label: "Directory Coming Soon", reason: "The quick directory is not published yet." }
+    secondaryCta: { type: 'command', command: 'open-discovery', label: "Search Builders & Guides" }
   },
   startHereCards,
   encyclopediaCategories: homepageKnowledgeCategories,
   quickLinks: [
     { type: 'internal', label: "Open Ecosystem Atlas", href: "/map" },
-    { type: 'unavailable', label: "Search Encyclopedia", reason: "Search is not published yet." },
+    { type: 'command', command: 'open-discovery', label: "Search Builders & Docs" },
     { type: 'unavailable', label: "View MPC Node Specs", reason: "Infrastructure specs are not published yet." },
   ],
   liveStatusFeed: [
@@ -126,7 +126,7 @@ export const uiStrings: UIConfig = {
   heroWaitingQuery: "_WAITING_FOR_QUERY...",
   heroSysTools: "System_Tools:",
   heroGenReport: "Generate_System_Report",
-  heroViewport: "VIEWPORT_PRIMARY: ECOSYSTEM_ATLAS_V3",
+  heroViewport: "VIEWPORT_PRIMARY: ECOSYSTEM_ATLAS",
   heroMode: "MODE: INTERACTIVE_MAPPING",
   heroRenderActive: "REALTIME_RENDER_ACTIVE",
   heroZoom: "ZOOM: 1.0X",
@@ -140,5 +140,19 @@ export const uiStrings: UIConfig = {
   mapSearchNoResults: "No systems match this query yet.",
   mapOverviewState: "Atlas Overview",
   mapFocusState: "Focused Territory",
-  backToAtlas: "← Back to Hub"
+  backToAtlas: "← Back to Hub",
+  discoveryOpen: "Open Atlas Search",
+  discoveryClose: "Close Search",
+  discoverySearchPlaceholder: "Search builders, glossary terms, MXEs, and guides...",
+  discoverySearchHint: "CTRL/CMD + K // ESC to close",
+  discoveryInitialState: "Search Arcium builders, glossary terms, developer guides, and category pages.",
+  discoveryNoResultsTitle: "No atlas records matched this query.",
+  discoveryNoResultsBody: "Try a glossary term, builder, MXE topic, or category name.",
+  discoveryGroupCore: "Core Network",
+  discoveryGroupProjects: "Builders",
+  discoveryGroupCategories: "Knowledge Areas",
+  discoveryGroupGlossary: "Glossary Terms",
+  discoveryGroupArticles: "Guides & Articles",
+  discoveryOpenResult: "Open Record",
+  discoverySecondaryAction: "Panel Action"
 };

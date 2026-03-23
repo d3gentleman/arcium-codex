@@ -9,7 +9,13 @@ import {
   getUIConfig,
 } from '@/lib/content';
 
-export default function MapPage() {
+interface MapPageProps {
+  searchParams?: {
+    focus?: string;
+  };
+}
+
+export default function MapPage({ searchParams }: MapPageProps) {
   const navLinks = getNavigation();
   const mapProps = {
     domainNodes: getMapNodes(),
@@ -17,6 +23,7 @@ export default function MapPage() {
     mapCategories: getMapCategories(),
     sceneConfig: getMapSceneLayout(),
     ui: getUIConfig(),
+    initialFocusNodeId: searchParams?.focus || null,
   };
 
   return (
