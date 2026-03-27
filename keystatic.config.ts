@@ -31,7 +31,11 @@ const bodySectionFields = {
 
 export default config({
   storage: {
-    kind: 'local',
+    kind: (process.env.NEXT_PUBLIC_KEYSTATIC_STORAGE_MODE as any) || 'local',
+    repo: {
+      owner: process.env.NEXT_PUBLIC_GITHUB_OWNER || 'd3gentleman',
+      name: process.env.NEXT_PUBLIC_GITHUB_REPO || 'learnarcium',
+    },
   },
   collections: {
     knowledgeCategories: collection({
