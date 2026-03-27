@@ -1,214 +1,131 @@
+import { createReader } from '@keystatic/core/reader';
+import keystaticConfig from '../../keystatic.config';
 import { 
-  DiscoveryItem,
+  KnowledgeCategoryRecord, 
+  KnowledgeArticleRecord, 
   GlossaryTermRecord,
-  MapNodeDefinition, 
-  MapEdgeDefinition, 
-  MapCategory, 
-  KnowledgeArticleRecord,
-  KnowledgeCategoryRecord,
-  ArticleReference, 
-  HomepageBlocks, 
-  LinkAction, 
-  FooterConfig, 
-  UIConfig, 
-  SceneConfig 
+  EcosystemProjectRecord,
+  NavigationLink,
+  FooterConfig,
+  UIConfig
 } from '../types/domain';
+import { CATEGORY_COLORS, NAVIGATION_CONFIG, FOOTER_CONFIG, UI_STRINGS } from './config';
 
-import { nodes, edges, categories as mapCategories } from '../data/ecosystem-content';
-import { sceneConfig } from '../data/scene-config';
-import { homepageBlocks, footerConfig, uiStrings, navLinks, recentArticles } from '../data/home';
-import { getGlossaryTermPath, glossaryTermRecords } from '../data/glossary-content';
-import {
-  getKnowledgeArticlePath,
-  getKnowledgeCategoryPath,
-  knowledgeArticleRecords,
-  knowledgeCategoryRecords,
-} from '../data/knowledge-content';
+const reader = createReader(process.cwd(), keystaticConfig);
 
-function collectSearchTerms(values: Array<string | undefined>): string[] {
-  return Array.from(
-    new Set(
-      values
-        .flatMap((value) => (value || '').split(/[\s,/]+/))
-        .map((value) => value.trim())
-        .filter(Boolean)
-    )
+// --- CATEGORIES ---
+
+export async function getKnowledgeCategories(): Promise<KnowledgeCategoryRecord[]> {
+  const categories = await reader.collections.knowledgeCategories.all();
+  return categories.map(cat => ({
+    ...cat.entry,
+    slug: cat.slug,
+  })) as KnowledgeCategoryRecord[];
+}
+
+export async function getKnowledgeCategoryBySlug(slug: string): Promise<KnowledgeCategoryRecord | null> {
+  const category = await reader.collections.knowledgeCategories.read(slug);
+  if (!category) return null;
+  return { ...category, slug };
+}
+
+export async function getKnowledgeCategoryById(id: string): Promise<KnowledgeCategoryRecord | null> {
+  const categories = await getKnowledgeCategories();
+  return categories.find(c => c.id === id) || null;
+}
+
+// --- ARTICLES ---
+
+export async function getKnowledgeArticles(): Promise<KnowledgeArticleRecord[]> {
+  const articles = await reader.collections.knowledgeArticles.all();
+  return articles.map(art => ({
+    ...art.entry,
+    slug: art.slug,
+  })) as KnowledgeArticleRecord[];
+}
+
+export async function getKnowledgeArticleBySlug(slug: string): Promise<KnowledgeArticleRecord | null> {
+  const article = await reader.collections.knowledgeArticles.read(slug);
+  if (!article) return null;
+  return { ...article, slug };
+}
+
+export async function getKnowledgeArticlesByCategoryId(categoryId: string | undefined): Promise<KnowledgeArticleRecord[]> {
+  if (!categoryId) return [];
+  const articles = await getKnowledgeArticles();
+  const category = await getKnowledgeCategoryBySlug(categoryId) || await getKnowledgeCategoryById(categoryId);
+  
+  return articles.filter((article) => 
+    article.relatedCategoryId === categoryId || 
+    (category && article.relatedCategoryId === category.id) ||
+    (category && article.relatedCategoryId === category.slug)
   );
 }
 
-export function getMapNodes(): MapNodeDefinition[] {
-  return nodes;
+// --- GLOSSARY ---
+
+export async function getGlossaryTerms(): Promise<GlossaryTermRecord[]> {
+  const terms = await reader.collections.glossaryTerms.all();
+  return terms.map(t => ({
+    ...t.entry,
+    slug: t.slug,
+  })) as GlossaryTermRecord[];
 }
 
-export function getMapEdges(): MapEdgeDefinition[] {
-  return edges;
+export async function getGlossaryTermBySlug(slug: string): Promise<GlossaryTermRecord | null> {
+  const term = await reader.collections.glossaryTerms.read(slug);
+  if (!term) return null;
+  return { ...term, slug };
 }
 
-export function getMapCategories(): MapCategory[] {
-  return mapCategories;
+// --- ECOSYSTEM ---
+
+export async function getEcosystemProjects(): Promise<EcosystemProjectRecord[]> {
+  const projects = await reader.collections.ecosystemProjects.all();
+  return projects.map(p => ({
+    ...p.entry,
+    slug: p.slug,
+  })) as EcosystemProjectRecord[];
 }
 
-export function getRecentArticles(): ArticleReference[] {
-  return recentArticles;
+export async function getEcosystemProjectBySlug(slug: string): Promise<EcosystemProjectRecord | null> {
+  const project = await reader.collections.ecosystemProjects.read(slug);
+  if (!project) return null;
+  return { ...project, slug };
 }
 
-export function getHomepageBlocks(): HomepageBlocks {
-  return homepageBlocks;
-}
+// --- AGGREGATORS & SEARCH ---
 
-export function getNavigation(): LinkAction[] {
-  return navLinks;
-}
-
-export function getFooterConfig(): FooterConfig {
-  return footerConfig;
-}
-
-export function getUIConfig(): UIConfig {
-  return uiStrings;
-}
-
-export function getMapSceneLayout(): SceneConfig {
-  return sceneConfig;
-}
-
-export function getKnowledgeCategories(): KnowledgeCategoryRecord[] {
-  return knowledgeCategoryRecords;
-}
-
-export function getKnowledgeCategoryById(id: string): KnowledgeCategoryRecord | undefined {
-  return knowledgeCategoryRecords.find((category) => category.id === id);
-}
-
-export function getKnowledgeCategoryBySlug(slug: string): KnowledgeCategoryRecord | undefined {
-  return knowledgeCategoryRecords.find((category) => category.slug === slug);
-}
-
-export function getKnowledgeArticles(): KnowledgeArticleRecord[] {
-  return knowledgeArticleRecords;
-}
-
-export function getKnowledgeArticleById(id: string): KnowledgeArticleRecord | undefined {
-  return knowledgeArticleRecords.find((article) => article.id === id);
-}
-
-export function getKnowledgeArticleBySlug(slug: string): KnowledgeArticleRecord | undefined {
-  return knowledgeArticleRecords.find((article) => article.slug === slug);
-}
-
-export function getKnowledgeArticlesByCategoryId(categoryId: string): KnowledgeArticleRecord[] {
-  return knowledgeArticleRecords.filter((article) => article.relatedCategoryId === categoryId);
-}
-
-export function getGlossaryTerms(): GlossaryTermRecord[] {
-  return glossaryTermRecords;
-}
-
-export function getGlossaryTermBySlug(slug: string): GlossaryTermRecord | undefined {
-  return glossaryTermRecords.find((term) => term.slug === slug);
-}
-
-export function getDiscoveryIndex(): DiscoveryItem[] {
-  const categoryNameById = new Map(mapCategories.map((category) => [category.id, category.name]));
-
-  const normalizedCategories = knowledgeCategoryRecords.map<DiscoveryItem>((category) => ({
-    id: category.id,
-    kind: 'category',
-    title: category.title,
-    tag: category.tag,
-    eyebrow: category.group === 'ecosystem' ? 'ECOSYSTEM GUIDE' : 'KNOWLEDGE AREA',
-    summary: category.summary,
-    keywords: collectSearchTerms([
-      category.title,
-      category.slug,
-      category.tag,
-      category.prefix,
-      category.summary,
-      category.description,
-      category.group,
-      ...(category.relatedNodeIds || []),
-    ]),
-    href: getKnowledgeCategoryPath(category.slug),
-    priority: 'high',
-  }));
-
-  const normalizedArticles = knowledgeArticleRecords.map<DiscoveryItem>((article) => {
-    const relatedCategory = article.relatedCategoryId
-      ? knowledgeCategoryRecords.find((category) => category.id === article.relatedCategoryId)
-      : undefined;
-
-    return {
-      id: article.id,
-      kind: 'article',
-      title: article.title,
-      tag: article.tag,
-      eyebrow: article.kind === 'guide' ? 'DEVELOPER GUIDE' : 'REFERENCE ARTICLE',
-      summary: article.summary,
-      keywords: collectSearchTerms([
-        article.title,
-        article.slug,
-        article.tag,
-        article.kind,
-        article.summary,
-        relatedCategory?.title,
-        relatedCategory?.tag,
-        ...(article.relatedNodeIds || []),
-      ]),
-      href: getKnowledgeArticlePath(article.slug),
-      priority: article.kind === 'guide' ? 'high' : 'medium',
-    };
-  });
-
-  const normalizedGlossary = glossaryTermRecords.map<DiscoveryItem>((term) => ({
-    id: term.id,
-    kind: 'glossary',
-    title: term.term,
-    tag: term.tag,
-    eyebrow: 'GLOSSARY TERM',
-    summary: term.summary,
-    keywords: collectSearchTerms([
-      term.term,
-      term.slug,
-      term.tag,
-      term.summary,
-      ...term.aliases,
-      ...term.keywords,
-    ]),
-    href: getGlossaryTermPath(term.slug),
-    priority: term.priority,
-  }));
-
-  const normalizedNodes = nodes
-    .filter((node) => node.kind !== 'category')
-    .map<DiscoveryItem>((node) => ({
-      id: node.id,
-      kind: node.kind,
-      title: node.label,
-      tag: node.tag,
-      eyebrow: node.kind === 'core'
-        ? 'PRIVATE COMPUTATION NETWORK'
-        : `BUILDER // ${categoryNameById.get(node.categoryId || '') || 'ECOSYSTEM'}`,
-      summary: node.beginnerDescription,
-      keywords: collectSearchTerms([
-        node.label,
-        node.technicalLabel,
-        node.compactLabel,
-        node.tag,
-        node.beginnerDescription,
-        node.technicalDescription,
-        node.whyItMatters,
-        categoryNameById.get(node.categoryId || ''),
-      ]),
-      href: `/map?focus=${node.id}`,
-      priority: node.priority,
-      secondaryAction: node.action,
-      featured: node.featuredOnOverview,
-    }));
+export async function getDiscoveryIndex() {
+  const [categories, articles, terms, projects] = await Promise.all([
+    getKnowledgeCategories(),
+    getKnowledgeArticles(),
+    getGlossaryTerms(),
+    getEcosystemProjects()
+  ]);
 
   return [
-    ...normalizedCategories,
-    ...normalizedArticles,
-    ...normalizedGlossary,
-    ...normalizedNodes,
+    ...categories.map(c => ({ id: c.id, slug: c.slug, title: c.title, type: 'category' as const, group: 'Knowledge Areas' })),
+    ...articles.map(a => ({ id: a.id, slug: a.slug, title: a.title, type: 'article' as const, group: 'Guides & Articles' })),
+    ...terms.map(t => ({ id: t.id, slug: t.slug, title: t.term, type: 'glossary' as const, group: 'Glossary Terms' })),
+    ...projects.map(p => ({ id: p.id, slug: p.slug, title: p.title, type: 'project' as const, group: 'Builders' }))
   ];
+}
+
+// --- CONFIG & UI ---
+
+export async function getNavigation(): Promise<NavigationLink[]> {
+  return NAVIGATION_CONFIG;
+}
+
+export async function getFooterConfig(): Promise<FooterConfig> {
+  return FOOTER_CONFIG;
+}
+
+export async function getUIConfig(): Promise<UIConfig> {
+  return UI_STRINGS;
+}
+
+export async function getCategoryColors(): Promise<Record<string, string>> {
+  return CATEGORY_COLORS;
 }
