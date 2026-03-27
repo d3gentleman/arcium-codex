@@ -21,7 +21,7 @@ export default function ShellSwitcher({ children, discoveryItems, ui }: ShellSwi
   const isAdminPath = pathname.startsWith('/keystatic') || pathname.startsWith('/login');
 
   if (isAdminPath) {
-    return <main className="min-h-screen bg-background">{children}</main>;
+    return <>{children}</>;
   }
 
   return (

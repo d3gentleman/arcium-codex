@@ -15,7 +15,12 @@ export default withAuth(
     const isApiContentPath = req.nextUrl.pathname.startsWith('/api/content');
 
     if (isKeystaticPath || isApiContentPath) {
-      if (!username || !allowedUsers.includes(username.toLowerCase())) {
+      console.log(`[MIDDLEWARE] Accessing protected path: ${req.nextUrl.pathname} (User: ${username})`);
+      
+      const isAuthorized = username && allowedUsers.includes(username.toLowerCase());
+      
+      if (!isAuthorized) {
+        console.warn(`[MIDDLEWARE] Unauthorized access attempt to ${req.nextUrl.pathname} by ${username || 'Anonymous'}`);
         return new NextResponse('Forbidden: Your GitHub account is not authorized to access this admin panel.', {
           status: 403,
         });
