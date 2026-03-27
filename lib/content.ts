@@ -129,3 +129,12 @@ export async function getUIConfig(): Promise<UIConfig> {
 export async function getCategoryColors(): Promise<Record<string, string>> {
   return CATEGORY_COLORS;
 }
+
+export async function getHomepageConfig() {
+  return HOMEPAGE_CONFIG;
+}
+
+export async function getRecentArticles(count: number = 3): Promise<KnowledgeArticleRecord[]> {
+  const articles = await getKnowledgeArticles();
+  return articles.slice(0, count);
+}

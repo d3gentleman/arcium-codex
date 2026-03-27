@@ -122,3 +122,88 @@ export const CATEGORY_COLORS: Record<string, string> = {
   "cat-consumer": "#FF00E5",
   "cat-prediction": "#B200FF"
 };
+
+export const HOMEPAGE_CONFIG = {
+  hero: {
+    subtitle: "Core Functionality: Exploration",
+    titleLine1: "NAVIGATE THE",
+    titleLine2: "ECOSYSTEM_ATLAS",
+    description: "Explore the builders, guides, and private computation concepts that make the Arcium network legible.",
+    primaryCta: {
+      type: "internal",
+      label: "View Ecosystem",
+      href: "/ecosystem"
+    },
+    secondaryCta: {
+      type: "command",
+      command: "open-discovery",
+      label: "Search Builders & Guides"
+    }
+  },
+  startHereCards: [
+    {
+      prefix: "SYS_A",
+      tag: "Subsystem_A",
+      title: "Understanding Arcium",
+      description: "A concise overview of Arcium as a confidential execution layer and why it matters across the rest of the atlas.",
+      action: {
+        type: "internal",
+        label: "Read Guide",
+        href: "/encyclopedia/articles/understanding-arcium"
+      }
+    },
+    {
+      prefix: "SYS_B",
+      tag: "Subsystem_B",
+      title: "What are MXEs?",
+      description: "An introductory framing for the execution environments that power Arcium across the network.",
+      action: {
+        type: "internal",
+        label: "Read Guide",
+        href: "/encyclopedia/articles/what-are-mxes"
+      }
+    },
+    {
+      prefix: "GRID",
+      tag: "Optimization",
+      title: "Ecosystem Overview",
+      description: "A quick orientation to the major territories on the Arcium map and how to read them.",
+      action: {
+        type: "internal",
+        label: "Read Overview",
+        href: "/encyclopedia/articles/ecosystem-overview"
+      }
+    }
+  ],
+  quickLinks: [
+    {
+      type: "internal",
+      label: "View Ecosystem",
+      href: "/ecosystem"
+    },
+    {
+      type: "command",
+      command: "open-discovery",
+      label: "Search Builders & Docs"
+    },
+    {
+      type: "unavailable",
+      label: "View MPC Node Specs",
+      reason: "Infrastructure specs are not published yet."
+    }
+  ],
+  liveStatusFeed: [
+    {
+      status: "OK",
+      text: "Atlas_Sync: Complete"
+    },
+    {
+      status: "OK",
+      text: "MXE_Engines: Active"
+    },
+    {
+      status: "OK",
+      text: "MPC_Nodes: 4,092 Online"
+    }
+  ]
+};
