@@ -1,8 +1,8 @@
 export type LinkAction = 
-  | { type: 'internal'; label: string; href: string }
-  | { type: 'external'; label: string; href: string }
-  | { type: 'command'; label: string; command: string }
-  | { type: 'unavailable'; label: string; reason: string };
+  | { type: 'internal'; label: string; href: string; icon?: string; section?: string }
+  | { type: 'external'; label: string; href: string; icon?: string; section?: string }
+  | { type: 'command'; label: string; command: string; icon?: string; section?: string }
+  | { type: 'unavailable'; label: string; reason: string; icon?: string; section?: string };
 
 export type NavigationLink = LinkAction;
 

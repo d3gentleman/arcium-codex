@@ -11,80 +11,96 @@ interface HeroProps {
     secondaryCta: LinkAction;
   };
   quickLinks: LinkAction[];
-  liveStatusFeed: unknown[];
+  liveStatusFeed: any[];
 }
 
 export default function Hero({ hero, quickLinks, liveStatusFeed }: HeroProps) {
   return (
-    <section className="col-span-12 lg:col-span-12 mb-12 relative overflow-hidden bg-surface-container-low/30 border border-outline-variant/20 p-8 md:p-12 shadow-[12px_12px_0px_rgba(0,0,0,0.4)]">
-      {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 blur-[100px] pointer-events-none" />
-      
-      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-12">
-        <div className="flex-1 max-w-2xl">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="h-[2px] w-12 bg-primary"></div>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary drop-shadow-[0_0_8px_rgba(0,255,163,0.5)]">
-              {hero.subtitle}
-            </span>
-          </div>
-          
-          <h1 className="text-4xl md:text-6xl font-black leading-[0.9] uppercase tracking-tighter mb-8 font-headline">
-            <span className="block text-white">{hero.titleLine1}</span>
-            <span className="block text-primary drop-shadow-[0_0_15px_rgba(0,255,163,0.3)]">{hero.titleLine2}</span>
-          </h1>
-          
-          <p className="text-on-surface-variant/80 text-lg leading-relaxed mb-10 border-l-2 border-outline-variant/30 pl-6 max-w-xl">
+    <section className="relative overflow-hidden mb-24 px-6 lg:px-0">
+      <div className="flex flex-col lg:flex-row gap-16 items-start">
+        <div className="flex-1 space-y-10">
+          <header className="space-y-4">
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] font-mono tracking-[0.4em] text-secondary uppercase">
+                {hero.subtitle}
+              </span>
+              <div className="h-[1px] flex-1 bg-gradient-to-r from-secondary/40 to-transparent" />
+            </div>
+            
+            <h1 className="text-6xl md:text-8xl font-headline font-bold leading-[0.85] tracking-tighter text-white uppercase">
+              MASTERING
+              <span className="block text-primary">INFRASTRUCTURE</span>
+            </h1>
+          </header>
+
+          <p className="text-xl text-on-surface-variant leading-relaxed max-w-xl font-body">
             {hero.description}
           </p>
-          
-          <div className="flex flex-wrap gap-4">
+
+          <div className="flex flex-wrap gap-6 pt-4">
             <ActionLink
               action={hero.primaryCta}
-              className="px-8 py-4 bg-primary text-on-primary font-black uppercase tracking-widest text-xs hover:bg-white transition-all transform hover:-translate-y-1 active:translate-y-0 shadow-[4px_4px_0px_rgba(0,0,0,0.3)]"
+              className="px-10 py-5 bg-primary text-surface font-headline font-bold uppercase tracking-widest text-[11px] transition-all hover:bg-white hover:scale-[1.02] active:scale-[0.98]"
             >
-              {hero.primaryCta.label}
+              PROJECT_DATABASE
             </ActionLink>
             
             <ActionLink
               action={hero.secondaryCta}
-              className="px-8 py-4 border border-outline-variant/50 bg-surface-container-high/50 text-white font-black uppercase tracking-widest text-xs hover:bg-surface-container-highest transition-all transform hover:-translate-y-1 active:translate-y-0 shadow-[4px_4px_0px_rgba(0,0,0,0.3)]"
+              className="px-10 py-5 border border-outline/20 bg-surface-container-high/40 text-on-surface font-headline font-bold uppercase tracking-widest text-[11px] backdrop-blur-sm transition-all hover:bg-surface-container-highest"
             >
-              {hero.secondaryCta.label}
+              TECHNICAL_SEARCH
             </ActionLink>
           </div>
         </div>
-        
-        <div className="w-full lg:w-80 flex flex-col gap-8">
-          <div className="p-6 bg-black/40 border border-outline-variant/20 backdrop-blur-md rounded-sm">
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-outline mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-              Live_Status_Feed
-            </div>
-            <div className="space-y-3 font-mono text-[10px]">
-              {liveStatusFeed.map((item: any, i) => (
-                <div key={i} className="flex justify-between items-center border-b border-outline-variant/10 pb-2 last:border-0 last:pb-0">
-                  <span className="text-on-surface-variant/60">[{item.status}]</span>
-                  <span className="text-on-surface-variant truncate ml-2">{'//'} {item.text}</span>
+
+        <div className="w-full lg:w-[400px] space-y-8">
+          {/* Terminal Block */}
+          <div className="bg-surface-container-lowest p-6 border-l-2 border-primary/40 relative group">
+            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative z-10 space-y-4 font-mono text-[10px]">
+              <div className="flex justify-between text-on-surface-variant/40 border-b border-outline-variant/10 pb-2">
+                <span>SYSTEM_STATUS</span>
+                <span>ID: ARCH-01</span>
+              </div>
+              <div className="space-y-2 text-primary">
+                <div className="flex gap-3">
+                  <span className="opacity-40">{'>'}</span>
+                  <span className="animate-[pulse_2s_infinite]">init_node --type=validator</span>
                 </div>
-              ))}
+                <div className="flex gap-3">
+                  <span className="opacity-40">{'>'}</span>
+                  <span>syncing_blocks...</span>
+                </div>
+                <div className="flex gap-3 justify-between">
+                  <span className="opacity-40">PROGRESS:</span>
+                  <div className="flex-1 mx-4 bg-outline-variant/20 h-[6px] mt-1 relative overflow-hidden">
+                    <div className="absolute inset-y-0 left-0 bg-primary w-[88%] animate-[pulse_1.5s_infinite]" />
+                  </div>
+                  <span>88%</span>
+                </div>
+              </div>
             </div>
           </div>
-          
-          <div className="p-6 bg-primary/5 border border-primary/20 backdrop-blur-md rounded-sm">
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-4">
+
+          {/* Quick Access */}
+          <div className="space-y-4">
+            <h3 className="text-[10px] font-mono tracking-[0.2em] text-on-surface-variant/40 uppercase">
               Quick_Access_Nodes
-            </div>
-            <div className="flex flex-col gap-2">
+            </h3>
+            <div className="grid grid-cols-1 gap-1">
               {quickLinks.map((link, i) => (
                 <ActionLink
                   key={i}
                   action={link}
-                  className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant hover:text-primary flex items-center justify-between group transition-colors"
+                  className="p-4 bg-surface-container-low hover:bg-surface-container-high transition-colors group flex items-center justify-between"
                 >
-                  <span>{link.label}</span>
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                  <span className="text-[11px] font-headline font-bold uppercase tracking-widest text-on-surface">
+                    {link.label}
+                  </span>
+                  <span className="text-primary opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+                    →
+                  </span>
                 </ActionLink>
               ))}
             </div>
@@ -94,3 +110,4 @@ export default function Hero({ hero, quickLinks, liveStatusFeed }: HeroProps) {
     </section>
   );
 }
+

@@ -2,29 +2,74 @@ import { FooterConfig, LinkAction, UIConfig } from "@/types/domain";
 
 export const NAVIGATION_CONFIG: LinkAction[] = [
   {
-    type: "internal" as const,
-    label: "Ecosystem",
-    href: "/ecosystem"
+    type: "internal",
+    label: "Modules",
+    href: "/modules",
+    icon: "Layers",
+    section: "PRIMARY"
   },
   {
-    type: "internal" as const,
-    label: "Encyclopedia",
-    href: "/encyclopedia"
+    type: "unavailable",
+    label: "Terminal",
+    reason: "Secure terminal environment is initializing.",
+    icon: "Terminal",
+    section: "PRIMARY"
   },
   {
-    type: "internal" as const,
-    label: "Glossary",
-    href: "/glossary"
+    type: "external",
+    label: "Documentation",
+    href: "https://docs.arcium.com",
+    icon: "FileCode2",
+    section: "PRIMARY"
   },
   {
-    type: "unavailable" as const,
-    label: "Infrastructure",
-    reason: "Infrastructure guides are not published yet."
+    type: "internal",
+    label: "Fundamentals",
+    href: "/modules#fundamentals",
+    icon: "Info",
+    section: "CORE PROTOCOL"
   },
   {
-    type: "unavailable" as const,
-    label: "About",
-    reason: "About page is not published yet."
+    type: "internal",
+    label: "Architecture",
+    href: "/modules#architecture",
+    icon: "Database",
+    section: "CORE PROTOCOL"
+  },
+  {
+    type: "internal",
+    label: "Execution",
+    href: "/modules#execution",
+    icon: "Cpu",
+    section: "CORE PROTOCOL"
+  },
+  {
+    type: "internal",
+    label: "Security",
+    href: "/modules#security",
+    icon: "Shield",
+    section: "CORE PROTOCOL"
+  },
+  {
+    type: "internal",
+    label: "Economics",
+    href: "/modules#economics",
+    icon: "CheckCircle2",
+    section: "CORE PROTOCOL"
+  },
+  {
+    type: "external",
+    label: "Support",
+    href: "https://discord.gg/arcium",
+    icon: "HelpCircle",
+    section: "UTILITIES"
+  },
+  {
+    type: "unavailable",
+    label: "Archive",
+    reason: "Historical records are being indexed.",
+    icon: "Archive",
+    section: "UTILITIES"
   }
 ];
 
@@ -204,6 +249,61 @@ export const HOMEPAGE_CONFIG = {
     {
       status: "OK",
       text: "MPC_Nodes: 4,092 Online"
+    }
+  ]
+};
+
+export const MODULES_PAGE_CONFIG = {
+  hero: {
+    eyebrow: "SYSTEM_CURRICULUM_V1",
+    title: "MASTERING INFRASTRUCTURE",
+    description: "A comprehensive technical deep-dive into the Arcium network architecture, from cryptographic foundations to economic incentives."
+  },
+  categories: [
+    {
+      id: "fundamentals",
+      title: "Fundamentals",
+      description: "The core concepts and historical context of the Arcium protocol.",
+      modules: [
+        { id: "intro", title: "Introduction to Codex", progress: 100, tag: "CORE" },
+        { id: "history", title: "Network Evolution", progress: 65, tag: "HISTORY" }
+      ]
+    },
+    {
+      id: "architecture",
+      title: "Architecture",
+      description: "Deep dive into data structures and network topology.",
+      modules: [
+        { id: "data", title: "Data Structures", progress: 0, tag: "SPEC" },
+        { id: "topology", title: "Consensus Topology", progress: 0, tag: "NET" }
+      ]
+    },
+    {
+      id: "execution",
+      title: "Execution",
+      description: "Understanding the Modular Execution Environment (MXE).",
+      modules: [
+        { id: "mxe-intro", title: "MXE Overview", progress: 0, tag: "COMPUTE" },
+        { id: "isolation", title: "Execution Isolation", progress: 0, tag: "VIRTUAL" }
+      ]
+    },
+    {
+      id: "security",
+      title: "Security",
+      description: "Cryptographic layers and governance mechanisms.",
+      modules: [
+        { id: "crypto", title: "Cryptographic Proofs", progress: 0, tag: "LOCK" },
+        { id: "gov", title: "Network Governance", progress: 0, tag: "RULES" }
+      ]
+    },
+    {
+      id: "economics",
+      title: "Economics",
+      description: "Incentive structures and treasury management.",
+      modules: [
+        { id: "incentives", title: "Node Incentives", progress: 0, tag: "TOKEN" },
+        { id: "treasury", title: "Protocol Treasury", progress: 0, tag: "FUND" }
+      ]
     }
   ]
 };

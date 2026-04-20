@@ -2,11 +2,13 @@
 
 import { usePathname } from 'next/navigation';
 import DiscoveryShell from '@/components/DiscoveryShell';
-import { DiscoveryItem, UIConfig } from '@/types/domain';
+import CodexSidebar from '@/components/CodexSidebar';
+import { DiscoveryItem, UIConfig, NavigationLink } from '@/types/domain';
 
 interface ShellSwitcherProps {
   children: React.ReactNode;
   discoveryItems: DiscoveryItem[];
+  navLinks: NavigationLink[];
   ui: UIConfig;
 }
 
@@ -15,7 +17,7 @@ interface ShellSwitcherProps {
  * This prevents the global atlas UI (grid, scanlines, discovery) from interfering
  * with the Keystatic Admin dashboard and login pages.
  */
-export default function ShellSwitcher({ children, discoveryItems, ui }: ShellSwitcherProps) {
+export default function ShellSwitcher({ children, discoveryItems, navLinks, ui }: ShellSwitcherProps) {
   const pathname = usePathname();
   
   // Define paths that should NOT have the global DiscoveryShell
@@ -27,9 +29,17 @@ export default function ShellSwitcher({ children, discoveryItems, ui }: ShellSwi
 
   return (
     <DiscoveryShell items={discoveryItems} ui={ui}>
-      <div className="fixed inset-0 scanline-effect z-[100] pointer-events-none"></div>
-      <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-4 relative z-10 w-full h-full">
-        {children}
+      <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" />
+      <div className="absolute inset-0 scanline-effect z-40 pointer-events-none opacity-20" />
+      
+      <CodexSidebar links={navLinks} />
+
+      <div className="flex-1 w-full relative z-10">
+        <div className="max-w-[1440px] mx-auto grid grid-cols-12 gap-8 lg:px-8">
+          <main className="col-span-12 lg:col-start-4 lg:col-span-9 min-h-screen">
+            {children}
+          </main>
+        </div>
       </div>
     </DiscoveryShell>
   );
