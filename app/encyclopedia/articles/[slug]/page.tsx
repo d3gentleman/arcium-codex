@@ -12,9 +12,9 @@ import {
 } from '@/lib/content';
 
 interface ArticlePageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -25,7 +25,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
-  const article = await getKnowledgeArticleBySlug(params.slug);
+  const { slug } = await params;
+  const article = await getKnowledgeArticleBySlug(slug);
 
   if (!article) {
     return {
@@ -40,7 +41,8 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
-  const article = await getKnowledgeArticleBySlug(params.slug);
+  const { slug } = await params;
+  const article = await getKnowledgeArticleBySlug(slug);
 
   if (!article) {
     notFound();

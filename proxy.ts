@@ -2,7 +2,7 @@ import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 
 export default withAuth(
-  function middleware(req) {
+  function proxy(req) {
     const token = req.nextauth.token;
     const username = token?.githubUsername as string | undefined;
     
@@ -15,12 +15,12 @@ export default withAuth(
     const isApiContentPath = req.nextUrl.pathname.startsWith('/api/content');
 
     if (isKeystaticPath || isApiContentPath) {
-      console.log(`[MIDDLEWARE] Accessing protected path: ${req.nextUrl.pathname} (User: ${username})`);
+      console.log(`[PROXY] Accessing protected path: ${req.nextUrl.pathname} (User: ${username})`);
       
       const isAuthorized = username && allowedUsers.includes(username.toLowerCase());
       
       if (!isAuthorized) {
-        console.warn(`[MIDDLEWARE] Unauthorized access attempt to ${req.nextUrl.pathname} by ${username || 'Anonymous'}`);
+        console.warn(`[PROXY] Unauthorized access attempt to ${req.nextUrl.pathname} by ${username || 'Anonymous'}`);
         return new NextResponse('Forbidden: Your GitHub account is not authorized to access this admin panel.', {
           status: 403,
         });

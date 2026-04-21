@@ -13,9 +13,9 @@ import {
 } from '@/lib/content';
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -26,7 +26,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const category = await getKnowledgeCategoryBySlug(params.slug);
+  const { slug } = await params;
+  const category = await getKnowledgeCategoryBySlug(slug);
 
   if (!category) {
     return {
@@ -41,8 +42,9 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
+  const { slug } = await params;
   const [category, allArticles] = await Promise.all([
-    getKnowledgeCategoryBySlug(params.slug),
+    getKnowledgeCategoryBySlug(slug),
     getKnowledgeArticles()
   ]);
 

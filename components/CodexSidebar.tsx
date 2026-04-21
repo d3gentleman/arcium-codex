@@ -47,7 +47,7 @@ export default function CodexSidebar({ links, version = "V1.0.4-BETA" }: CodexSi
             </h3>
             <div className="space-y-1">
               {sectionLinks.map((link, idx) => {
-                const isActive = pathname === link.href;
+                const isActive = 'href' in link ? pathname === link.href : false;
                 const isUnavailable = link.type === 'unavailable';
                 
                 // Dynamically get the icon component
@@ -70,16 +70,8 @@ export default function CodexSidebar({ links, version = "V1.0.4-BETA" }: CodexSi
                   );
                 }
 
-                return (
-                  <Link
-                    key={idx}
-                    href={link.href!}
-                    className={`group flex items-center gap-3 p-3 transition-all duration-300 rounded-sm ${
-                      isActive 
-                        ? 'bg-primary/10 border-l-2 border-primary' 
-                        : 'hover:bg-white/5 border-l-2 border-transparent'
-                    }`}
-                  >
+                const content = (
+                  <>
                     {IconComponent && (
                       <IconComponent 
                         size={14} 
@@ -94,6 +86,36 @@ export default function CodexSidebar({ links, version = "V1.0.4-BETA" }: CodexSi
                     {isActive && (
                       <div className="ml-auto w-1 h-1 rounded-full bg-primary animate-pulse" />
                     )}
+                  </>
+                );
+
+                const commonClasses = `group flex items-center gap-3 p-3 transition-all duration-300 rounded-sm ${
+                  isActive 
+                    ? 'bg-primary/10 border-l-2 border-primary' 
+                    : 'hover:bg-white/5 border-l-2 border-transparent'
+                }`;
+
+                if (link.type === 'command') {
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      className={`w-full text-left appearance-none border-0 bg-transparent ${commonClasses}`}
+                    >
+                      {content}
+                    </button>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={idx}
+                    href={'href' in link ? link.href : '#'}
+                    target={link.type === 'external' ? '_blank' : undefined}
+                    rel={link.type === 'external' ? 'noreferrer noopener' : undefined}
+                    className={commonClasses}
+                  >
+                    {content}
                   </Link>
                 );
               })}
