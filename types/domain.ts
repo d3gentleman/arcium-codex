@@ -24,6 +24,27 @@ export interface BodySection {
   body: string;
 }
 
+export type QuizQuestion =
+  | {
+      id: string;
+      type: "short_text";
+      prompt: string;
+      required: boolean;
+    }
+  | {
+      id: string;
+      type: "long_text";
+      prompt: string;
+      required: boolean;
+    }
+  | {
+      id: string;
+      type: "multiple_choice";
+      prompt: string;
+      required: boolean;
+      choices: string[];
+    };
+
 export interface KnowledgeCategoryRecord {
   id: string;
   slug: string;
@@ -46,6 +67,16 @@ export interface KnowledgeArticleRecord {
   kind: 'guide' | 'update' | 'article';
   date?: string;
   relatedCategoryId: string;
+}
+
+export interface ModuleLessonRecord {
+  slug: string;
+  title: string;
+  categoryId: string;
+  tag: string;
+  summary: string;
+  bodySections: BodySection[];
+  quizQuestions: QuizQuestion[];
 }
 
 export interface GlossaryTermRecord {

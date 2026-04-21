@@ -1,44 +1,50 @@
-import { withAuth } from 'next-auth/middleware';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 
-export default withAuth(
-  function proxy(req) {
-    const token = req.nextauth.token;
-    const username = token?.githubUsername as string | undefined;
-    
-    // Convert allowed usernames list to array of lowercase strings
-    const rawAllowed = process.env.ADMIN_GITHUB_USERNAMES || '';
-    const allowedUsers = rawAllowed.split(',').map(u => u.trim().toLowerCase());
-    
-    // Protection logic for Keystatic and Content API
-    const isKeystaticPath = req.nextUrl.pathname.startsWith('/keystatic');
-    const isApiContentPath = req.nextUrl.pathname.startsWith('/api/content');
+function getAllowedEmails() {
+  return (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+}
 
-    if (isKeystaticPath || isApiContentPath) {
-      console.log(`[PROXY] Accessing protected path: ${req.nextUrl.pathname} (User: ${username})`);
-      
-      const isAuthorized = username && allowedUsers.includes(username.toLowerCase());
-      
-      if (!isAuthorized) {
-        console.warn(`[PROXY] Unauthorized access attempt to ${req.nextUrl.pathname} by ${username || 'Anonymous'}`);
-        return new NextResponse('Forbidden: Your GitHub account is not authorized to access this admin panel.', {
-          status: 403,
-        });
-      }
+export async function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const isApiRoute = pathname.startsWith("/api/keystatic");
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+
+  if (!session?.user) {
+    if (isApiRoute) {
+      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
     }
-  },
-  {
-    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
+
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
   }
-);
+
+  const allowedEmails = getAllowedEmails();
+  const email = session.user.email.toLowerCase();
+  const isAuthorized = session.user.emailVerified && allowedEmails.includes(email);
+
+  if (isAuthorized) {
+    return NextResponse.next();
+  }
+
+  if (isApiRoute) {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
+
+  return new NextResponse("Forbidden: your account is not authorized to access this admin panel.", {
+    status: 403,
+  });
+}
 
 export const config = {
   matcher: [
-    '/keystatic/:path*',
-    '/api/keystatic/:path*',
-    '/api/content/:path*'
+    "/keystatic/:path*",
+    "/api/keystatic/:path*",
   ],
 };

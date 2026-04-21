@@ -1,0 +1,44 @@
+{
+  "slug": "intro",
+  "title": "Introduction to Codex",
+  "categoryId": "fundamentals",
+  "tag": "CORE",
+  "summary": "A first-pass lesson on how the atlas is organized, how to read its records, and why Arcium is framed as confidential execution infrastructure.",
+  "bodySections": [
+    {
+      "title": "Orientation",
+      "body": "The atlas is a guided reading surface, not just a static archive. Each lesson is meant to turn protocol terminology into a more legible system map.\n\nThe shortest useful framing for Arcium is that it lets applications compute on sensitive inputs without forcing a single operator to see all of the underlying data."
+    },
+    {
+      "title": "Why It Matters",
+      "body": "That framing matters because the rest of the ecosystem depends on it. Builders, glossary terms, and encyclopedia pages all become easier to reason about once confidential execution is the baseline mental model.\n\nUse this lesson as a vocabulary anchor before diving into the more technical modules."
+    }
+  ],
+  "quizQuestions": [
+    {
+      "id": "confidential-execution",
+      "type": "short_text",
+      "prompt": "In one sentence, what problem does Arcium solve?",
+      "required": true,
+      "choices": []
+    },
+    {
+      "id": "atlas-purpose",
+      "type": "multiple_choice",
+      "prompt": "What is the primary purpose of the atlas?",
+      "required": true,
+      "choices": [
+        "To organize protocol knowledge into an explorable learning surface",
+        "To replace the blockchain itself",
+        "To run all production smart contracts"
+      ]
+    },
+    {
+      "id": "takeaway",
+      "type": "long_text",
+      "prompt": "Describe the main idea you want to keep in mind before opening the next lesson.",
+      "required": true,
+      "choices": []
+    }
+  ]
+}

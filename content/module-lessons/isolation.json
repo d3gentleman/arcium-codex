@@ -1,0 +1,37 @@
+{
+  "slug": "isolation",
+  "title": "Execution Isolation",
+  "categoryId": "execution",
+  "tag": "VIRTUAL",
+  "summary": "A lesson on separating sensitive execution contexts so that workloads remain legible to operators without exposing the underlying private data.",
+  "bodySections": [
+    {
+      "title": "Why Isolation Exists",
+      "body": "Isolation keeps unrelated work from leaking into one another's execution paths. In a confidential system, that matters for both correctness and privacy.\n\nYou want operators to manage infrastructure, but you do not want infrastructure operators to gain unnecessary visibility into sensitive user inputs."
+    },
+    {
+      "title": "Operational Benefit",
+      "body": "Good isolation is not only defensive. It also makes reasoning about workloads easier, because boundaries are explicit and failure domains are easier to describe.\n\nThat kind of clarity is what turns privacy from an abstract promise into a system property."
+    }
+  ],
+  "quizQuestions": [
+    {
+      "id": "isolation-purpose",
+      "type": "short_text",
+      "prompt": "Why is isolation useful in confidential execution?",
+      "required": true,
+      "choices": []
+    },
+    {
+      "id": "operator-visibility",
+      "type": "multiple_choice",
+      "prompt": "What balance does the lesson describe?",
+      "required": true,
+      "choices": [
+        "Operators manage infrastructure without seeing unnecessary private data",
+        "Operators see all private data to optimize performance",
+        "Operators are removed from the system entirely"
+      ]
+    }
+  ]
+}

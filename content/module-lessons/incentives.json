@@ -1,0 +1,37 @@
+{
+  "slug": "incentives",
+  "title": "Node Incentives",
+  "categoryId": "economics",
+  "tag": "TOKEN",
+  "summary": "A lesson on why participant behavior needs aligned incentives if confidential execution is going to remain durable and useful.",
+  "bodySections": [
+    {
+      "title": "Behavior Follows Incentives",
+      "body": "Networks are not just software. They are collections of participants whose behavior is shaped by rewards, constraints, and opportunity cost.\n\nIf incentives are misaligned, even a technically elegant system can become unreliable in practice."
+    },
+    {
+      "title": "Durability",
+      "body": "Durability comes from making the desirable behavior economically rational often enough that the network keeps functioning under real-world pressure.\n\nThat is why incentive design belongs in the same conversation as architecture and security."
+    }
+  ],
+  "quizQuestions": [
+    {
+      "id": "incentive-behavior",
+      "type": "short_text",
+      "prompt": "Why does the lesson say incentives matter to network behavior?",
+      "required": true,
+      "choices": []
+    },
+    {
+      "id": "durability-definition",
+      "type": "multiple_choice",
+      "prompt": "How is durability described in this lesson?",
+      "required": true,
+      "choices": [
+        "As making desired behavior economically rational often enough to keep the network functioning",
+        "As maximizing inflation regardless of results",
+        "As eliminating all operating costs"
+      ]
+    }
+  ]
+}

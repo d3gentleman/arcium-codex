@@ -29,6 +29,25 @@ const bodySectionFields = {
   body: fields.text({ label: 'Body content', multiline: true }),
 };
 
+const quizQuestionFields = {
+  id: fields.text({ label: 'Question ID' }),
+  type: fields.select({
+    label: 'Question Type',
+    options: [
+      { label: 'Short Text', value: 'short_text' as const },
+      { label: 'Multiple Choice', value: 'multiple_choice' as const },
+      { label: 'Long Text', value: 'long_text' as const },
+    ],
+    defaultValue: 'short_text',
+  }),
+  prompt: fields.text({ label: 'Prompt', multiline: true }),
+  required: fields.checkbox({ label: 'Required', defaultValue: true }),
+  choices: fields.array(fields.text({ label: 'Choice' }), {
+    label: 'Choices',
+    itemLabel: (props) => props.value || 'Choice',
+  }),
+};
+
 export default config({
   storage: {
     kind: (process.env.NEXT_PUBLIC_KEYSTATIC_STORAGE_MODE as any) || 'local',
@@ -90,6 +109,27 @@ export default config({
         }),
         date: fields.text({ label: 'Date (YYYY-MM-DD)' }),
         relatedCategoryId: fields.text({ label: 'Related Category ID' }),
+      },
+    }),
+    moduleLessons: collection({
+      label: 'Module Lessons',
+      slugField: 'slug',
+      path: 'content/module-lessons/*',
+      format: { data: 'json' },
+      schema: {
+        slug: fields.slug({ name: { label: 'Slug' } }),
+        title: fields.text({ label: 'Title' }),
+        categoryId: fields.text({ label: 'Category ID' }),
+        tag: fields.text({ label: 'Tag' }),
+        summary: fields.text({ label: 'Summary', multiline: true }),
+        bodySections: fields.array(fields.object(bodySectionFields), {
+          label: 'Body Sections',
+          itemLabel: (props) => props.fields.title.value,
+        }),
+        quizQuestions: fields.array(fields.object(quizQuestionFields), {
+          label: 'Quiz Questions',
+          itemLabel: (props) => props.fields.prompt.value,
+        }),
       },
     }),
     glossaryTerms: collection({

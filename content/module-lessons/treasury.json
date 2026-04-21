@@ -1,0 +1,37 @@
+{
+  "slug": "treasury",
+  "title": "Protocol Treasury",
+  "categoryId": "economics",
+  "tag": "FUND",
+  "summary": "A lesson on treasury thinking as a long-horizon resource allocation problem rather than a passive pool of capital.",
+  "bodySections": [
+    {
+      "title": "Treasury as Strategy",
+      "body": "A treasury is not only a balance. It is a mechanism for deciding how resources support the network's future priorities.\n\nThat includes maintenance, ecosystem growth, research, and the resilience needed to keep development aligned with protocol goals."
+    },
+    {
+      "title": "Allocation and Accountability",
+      "body": "Once capital is viewed as strategic infrastructure, allocation decisions need to be legible and accountable.\n\nThis lesson frames treasury management as part of how a protocol turns long-term intent into durable execution."
+    }
+  ],
+  "quizQuestions": [
+    {
+      "id": "treasury-strategy",
+      "type": "short_text",
+      "prompt": "Why is the treasury described as more than just a balance?",
+      "required": true,
+      "choices": []
+    },
+    {
+      "id": "allocation-purpose",
+      "type": "multiple_choice",
+      "prompt": "What does treasury allocation help translate into action?",
+      "required": true,
+      "choices": [
+        "Long-term protocol intent",
+        "Only short-term price changes",
+        "Unstructured spending"
+      ]
+    }
+  ]
+}

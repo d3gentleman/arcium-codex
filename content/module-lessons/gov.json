@@ -1,0 +1,37 @@
+{
+  "slug": "gov",
+  "title": "Network Governance",
+  "categoryId": "security",
+  "tag": "RULES",
+  "summary": "A lesson on the rules, decision-making surfaces, and coordination expectations that keep technical systems legible over time.",
+  "bodySections": [
+    {
+      "title": "Governance Surface",
+      "body": "Governance is the set of mechanisms that decides how the system changes. That includes both formal rules and the practical coordination patterns people rely on when technical priorities conflict.\n\nIn a protocol setting, governance is inseparable from security because system evolution itself can introduce risk."
+    },
+    {
+      "title": "Why Learners Should Care",
+      "body": "Learners should care because architecture does not remain static. If you want to understand a network, you need to understand not only how it works today, but how it is allowed to change tomorrow.\n\nThat is why governance belongs beside cryptography in the curriculum."
+    }
+  ],
+  "quizQuestions": [
+    {
+      "id": "governance-definition",
+      "type": "short_text",
+      "prompt": "How does this lesson define governance?",
+      "required": true,
+      "choices": []
+    },
+    {
+      "id": "governance-security",
+      "type": "multiple_choice",
+      "prompt": "Why is governance presented as a security concern?",
+      "required": true,
+      "choices": [
+        "Because system changes can introduce new risk",
+        "Because governance replaces all technical controls",
+        "Because governance is only a legal issue"
+      ]
+    }
+  ]
+}

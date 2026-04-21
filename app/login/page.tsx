@@ -1,58 +1,107 @@
-'use client';
+"use client";
 
-import { signIn, useSession } from "next-auth/react";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Suspense, useEffect, useState } from "react";
+import { startTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import AuthShell from "@/components/auth/AuthShell";
+import { authClient } from "@/lib/auth-client";
 
-export default function LoginPage() {
-  const { data: session, status } = useSession();
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/modules";
+  const registered = searchParams.get("registered");
+  const { data: session, isPending } = authClient.useSession();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      router.push('/keystatic');
+    if (session?.user) {
+      router.push(callbackUrl);
     }
-  }, [status, router]);
+  }, [callbackUrl, router, session]);
+
+  async function handleSubmit(formData: FormData) {
+    setIsSubmitting(true);
+    setError(null);
+
+    const email = String(formData.get("email") || "").trim().toLowerCase();
+    const password = String(formData.get("password") || "");
+
+    const { error: signInError } = await authClient.signIn.email({
+      email,
+      password,
+      callbackURL: callbackUrl,
+    });
+
+    if (signInError) {
+      setError(signInError.message || "Unable to sign in.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    router.push(callbackUrl);
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black font-jetbrains">
-      <div className="w-full max-w-md border border-outline-variant/30 bg-surface-container-high/40 p-8 shadow-[8px_8px_0px_rgba(0,0,0,0.5)]">
-        <div className="mb-8 text-center">
-            <div className="mb-4 inline-flex border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.25em] text-primary">
-                SECURE_GATEWAY_V3
-            </div>
-          <h1 className="font-space text-3xl font-black uppercase tracking-tight text-white mb-2">
-            Admin <span className="text-primary">Login</span>
-          </h1>
-          <p className="text-sm text-on-surface-variant/60 uppercase tracking-widest">
-            Authorization / Required
-          </p>
-        </div>
+    <AuthShell title="Learner Login" eyebrow="ACCOUNT_ACCESS_V1" subtitle="Email / Password">
+      {registered ? (
+        <p className="mb-4 text-sm leading-7 text-primary">
+          Account created. Check Mailpit for your verification email before signing in.
+        </p>
+      ) : null}
+      {isPending ? (
+        <div className="py-8 text-center text-xs uppercase tracking-[0.2em] text-primary">Loading Session...</div>
+      ) : (
+        <form
+          className="space-y-4"
+          action={(formData) => {
+            startTransition(() => {
+              void handleSubmit(formData);
+            });
+          }}
+        >
+          <input
+            name="email"
+            type="email"
+            placeholder="Email"
+            required
+            className="w-full border border-outline-variant/30 bg-black/40 px-4 py-3 text-sm text-white outline-none transition-colors focus:border-primary"
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            required
+            className="w-full border border-outline-variant/30 bg-black/40 px-4 py-3 text-sm text-white outline-none transition-colors focus:border-primary"
+          />
+          {error ? <p className="text-sm text-red-300">{error}</p> : null}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full border-2 border-primary bg-primary/10 py-4 text-sm font-bold uppercase tracking-[0.2em] text-primary transition-all hover:bg-primary hover:text-black disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting ? "Signing In..." : "Sign In"}
+          </button>
+          <div className="flex justify-between text-[11px] uppercase tracking-[0.18em] text-on-surface-variant/70">
+            <Link href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="hover:text-primary">
+              Create Account
+            </Link>
+            <Link href="/forgot-password" className="hover:text-primary">
+              Reset Password
+            </Link>
+          </div>
+        </form>
+      )}
+    </AuthShell>
+  );
+}
 
-        {status === 'loading' ? (
-          <div className="py-12 text-center text-primary animate-pulse font-mono text-xs">
-            SYNCHRONIZING_SESSION...
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <button
-              onClick={() => signIn('github')}
-              className="flex w-full items-center justify-center gap-3 border-2 border-primary bg-primary/10 py-4 text-sm font-bold uppercase tracking-[0.2em] text-primary transition-all hover:bg-primary hover:text-black shadow-[4px_4px_0px_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-none"
-            >
-              Authorize with GitHub
-            </button>
-            
-            <div className="pt-4 text-center">
-                <p className="text-[10px] text-on-surface-variant/40 leading-relaxed uppercase">
-                    Only authorized developers from the Arcium Protocol Group can access the atlas core.
-                </p>
-            </div>
-          </div>
-        )}
-      </div>
-      
-      {/* Decorative scanline overlay */}
-      <div className="fixed inset-0 scanline-effect z-[100] pointer-events-none opacity-20"></div>
-    </div>
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<AuthShell title="Learner Login" eyebrow="ACCOUNT_ACCESS_V1" subtitle="Email / Password" />}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

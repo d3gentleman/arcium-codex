@@ -3,6 +3,7 @@ import keystaticConfig from '@/keystatic.config';
 import { 
   KnowledgeCategoryRecord, 
   KnowledgeArticleRecord, 
+  ModuleLessonRecord,
   GlossaryTermRecord,
   EcosystemProjectRecord,
   NavigationLink,
@@ -67,6 +68,27 @@ export async function getKnowledgeArticlesByCategoryId(categoryId: string | unde
     (category && article.relatedCategoryId === category.id) ||
     (category && article.relatedCategoryId === category.slug)
   );
+}
+
+// --- MODULE LESSONS ---
+
+export async function getModuleLessons(): Promise<ModuleLessonRecord[]> {
+  const lessons = await reader.collections.moduleLessons.all();
+  return lessons.map((lesson) => ({
+    ...lesson.entry,
+    slug: lesson.slug,
+  })) as ModuleLessonRecord[];
+}
+
+export async function getModuleLessonBySlug(slug: string): Promise<ModuleLessonRecord | null> {
+  const lesson = await reader.collections.moduleLessons.read(slug);
+  if (!lesson) return null;
+  return { ...lesson, slug } as ModuleLessonRecord;
+}
+
+export async function getModuleLessonsByCategoryId(categoryId: string): Promise<ModuleLessonRecord[]> {
+  const lessons = await getModuleLessons();
+  return lessons.filter((lesson) => lesson.categoryId === categoryId);
 }
 
 // --- GLOSSARY ---
@@ -210,4 +232,8 @@ export function getKnowledgeArticlePath(slug: string): string {
 
 export function getKnowledgeCategoryPath(slug: string): string {
   return `/encyclopedia/categories/${slug}`;
+}
+
+export function getModuleLessonPath(slug: string): string {
+  return `/modules/${slug}`;
 }

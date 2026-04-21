@@ -1,0 +1,37 @@
+{
+  "slug": "crypto",
+  "title": "Cryptographic Proofs",
+  "categoryId": "security",
+  "tag": "LOCK",
+  "summary": "An introductory lesson on why proofs matter when a system wants to convince others that a confidential computation behaved correctly.",
+  "bodySections": [
+    {
+      "title": "Proofs as Evidence",
+      "body": "Proof systems help bridge the gap between hidden inputs and public assurance. They let a system provide evidence about how a computation was performed without revealing all of the private state involved.\n\nThat is one of the core tools for making confidential execution credible to counterparties."
+    },
+    {
+      "title": "System Trust",
+      "body": "A system becomes easier to trust when it can show not only that a result exists, but that the result emerged from the right process.\n\nProofs are part of that story because they constrain what the system can claim without backing it up."
+    }
+  ],
+  "quizQuestions": [
+    {
+      "id": "proof-role",
+      "type": "short_text",
+      "prompt": "What problem do proofs solve in confidential systems?",
+      "required": true,
+      "choices": []
+    },
+    {
+      "id": "proofs-evidence",
+      "type": "multiple_choice",
+      "prompt": "How are proofs framed in this lesson?",
+      "required": true,
+      "choices": [
+        "As evidence about correct computation without full disclosure",
+        "As a replacement for all consensus",
+        "As a way to avoid any validation"
+      ]
+    }
+  ]
+}

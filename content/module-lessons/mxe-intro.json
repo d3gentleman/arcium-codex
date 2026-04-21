@@ -1,0 +1,37 @@
+{
+  "slug": "mxe-intro",
+  "title": "MXE Overview",
+  "categoryId": "execution",
+  "tag": "COMPUTE",
+  "summary": "A beginner-oriented explanation of MXEs as the execution surfaces where confidential workloads become concrete.",
+  "bodySections": [
+    {
+      "title": "Execution Surface",
+      "body": "MXE stands for MPC eXecution Environment. In the atlas, it refers to the place where protected computation happens in a way that is operationally meaningful to applications.\n\nThis is the bridge between theory and product behavior: confidential logic needs a place to execute, and MXEs are that place."
+    },
+    {
+      "title": "Application View",
+      "body": "From the application side, MXEs matter because they determine how developers think about running sensitive workflows without exposing every input.\n\nIf you understand MXEs as execution surfaces, later lessons on isolation and proofs become much easier to situate."
+    }
+  ],
+  "quizQuestions": [
+    {
+      "id": "mxe-definition",
+      "type": "short_text",
+      "prompt": "What does MXE stand for?",
+      "required": true,
+      "choices": []
+    },
+    {
+      "id": "mxe-role",
+      "type": "multiple_choice",
+      "prompt": "Why do MXEs matter for applications?",
+      "required": true,
+      "choices": [
+        "They provide the concrete surface where confidential logic executes",
+        "They replace all databases",
+        "They remove the need for coordination between nodes"
+      ]
+    }
+  ]
+}

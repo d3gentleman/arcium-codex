@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate-auth": "better-auth generate --config ./lib/auth.ts --output ./db/schema/better-auth.sql --yes",
+    "db:migrate": "node ./scripts/apply-migrations.mjs"
   },
   "dependencies": {
     "@keystatic/core": "latest",
@@ -21,13 +23,19 @@
     "gsap": "^3.15.0",
     "lucide-react": "^0.395.0",
     "next": "16.2.4",
-    "next-auth": "latest",
+    "nodemailer": "^7.0.10",
+    "pg": "^8.16.3",
     "react": "19.2.5",
     "react-dom": "19.2.5",
-    "tailwind-merge": "^2.3.0"
+    "tailwind-merge": "^2.3.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@better-auth/cli": "^1.4.21",
+    "@opentelemetry/api": "^1.9.1",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.0",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.19",

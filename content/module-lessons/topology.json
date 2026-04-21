@@ -1,0 +1,37 @@
+{
+  "slug": "topology",
+  "title": "Consensus Topology",
+  "categoryId": "architecture",
+  "tag": "NET",
+  "summary": "A high-level lesson on thinking about participating nodes, shared coordination, and where confidential execution fits into network shape.",
+  "bodySections": [
+    {
+      "title": "Coordination Surface",
+      "body": "Topology is about how components relate, not just how many of them exist. In confidential systems, that includes how work is split, where trust is minimized, and which participants are responsible for which pieces of computation.\n\nA useful mental model is to ask what each node knows, what it does not know, and what it can still help verify."
+    },
+    {
+      "title": "Execution Placement",
+      "body": "Execution placement affects both performance and privacy. The more carefully the network distributes sensitive operations, the less any single participant needs to observe in full.\n\nThat distributed posture is what makes confidential execution feel like topology, not just cryptography."
+    }
+  ],
+  "quizQuestions": [
+    {
+      "id": "topology-definition",
+      "type": "short_text",
+      "prompt": "What does topology mean in the context of this lesson?",
+      "required": true,
+      "choices": []
+    },
+    {
+      "id": "node-knowledge",
+      "type": "multiple_choice",
+      "prompt": "What question does the lesson suggest asking about each node?",
+      "required": true,
+      "choices": [
+        "What it knows, what it does not know, and what it can still verify",
+        "How many GPUs it owns",
+        "Which wallet it prefers"
+      ]
+    }
+  ]
+}

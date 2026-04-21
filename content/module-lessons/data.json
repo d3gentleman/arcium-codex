@@ -1,0 +1,37 @@
+{
+  "slug": "data",
+  "title": "Data Structures",
+  "categoryId": "architecture",
+  "tag": "SPEC",
+  "summary": "An overview of the records and identifiers that make atlas content and protocol concepts easier to navigate as structured knowledge.",
+  "bodySections": [
+    {
+      "title": "Structured Records",
+      "body": "The atlas breaks information into categories, articles, glossary terms, ecosystem entries, and lessons. That structure matters because it keeps navigation and retrieval consistent as the knowledge base grows.\n\nWhen the same concept appears in multiple contexts, stable identifiers and slugs prevent the learning surface from becoming ambiguous."
+    },
+    {
+      "title": "Why Structure Helps Learners",
+      "body": "A well-structured system makes it easier to understand dependencies between ideas. Instead of memorizing disconnected definitions, you can move between concepts with a stronger sense of what each record is for.\n\nThat is the same intuition protocol engineers use when they design clean interfaces between subsystems."
+    }
+  ],
+  "quizQuestions": [
+    {
+      "id": "structured-records",
+      "type": "short_text",
+      "prompt": "Why do stable identifiers matter in a growing knowledge system?",
+      "required": true,
+      "choices": []
+    },
+    {
+      "id": "record-types",
+      "type": "multiple_choice",
+      "prompt": "Which of these is one of the atlas record types mentioned in the lesson?",
+      "required": true,
+      "choices": [
+        "Glossary terms",
+        "Mining rigs",
+        "Validator firmware snapshots"
+      ]
+    }
+  ]
+}
