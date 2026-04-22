@@ -115,3 +115,14 @@ export async function addLessonComment(input: {
     [input.userId, input.lessonSlug, input.body],
   );
 }
+
+export async function getLessonCommentCountForUser(userId: string): Promise<number> {
+  const result = await query<{ count: string }>(
+    `select count(*)::text as count
+       from lesson_comment
+      where user_id = $1`,
+    [userId],
+  );
+
+  return Number(result.rows[0]?.count || "0");
+}

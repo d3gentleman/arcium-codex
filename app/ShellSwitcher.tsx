@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import DiscoveryShell from '@/components/DiscoveryShell';
 import CodexSidebar from '@/components/CodexSidebar';
+import TopAccountBar from '@/components/TopAccountBar';
 import { DiscoveryItem, UIConfig, NavigationLink } from '@/types/domain';
 
 interface ShellSwitcherProps {
@@ -21,7 +22,12 @@ export default function ShellSwitcher({ children, discoveryItems, navLinks, ui }
   const pathname = usePathname();
   
   // Define paths that should NOT have the global DiscoveryShell
-  const isAdminPath = pathname.startsWith('/keystatic') || pathname.startsWith('/login');
+  const isAdminPath =
+    pathname.startsWith('/keystatic') ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/forgot-password') ||
+    pathname.startsWith('/reset-password');
 
   if (isAdminPath) {
     return <>{children}</>;
@@ -34,9 +40,10 @@ export default function ShellSwitcher({ children, discoveryItems, navLinks, ui }
       
       <CodexSidebar links={navLinks} />
 
-      <div className="flex-1 w-full relative z-10">
+      <div className="flex-1 w-full relative z-10 lg:pl-72">
+        <TopAccountBar />
         <div className="max-w-[1440px] mx-auto grid grid-cols-12 gap-8 lg:px-8">
-          <main className="col-span-12 lg:col-start-4 lg:col-span-9 min-h-screen">
+          <main className="col-span-12 min-h-screen">
             {children}
           </main>
         </div>
