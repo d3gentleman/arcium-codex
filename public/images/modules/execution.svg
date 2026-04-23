@@ -1,0 +1,41 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#040608"/>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <g opacity="0.12" stroke="#69DAFF" stroke-width="1">
+    <path d="M0 190H1600"/>
+    <path d="M0 450H1600"/>
+    <path d="M0 710H1600"/>
+  </g>
+  <g filter="url(#blur)">
+    <path d="M112 582C292 560 308 314 502 300C682 288 690 616 894 612C1086 608 1124 256 1310 244C1418 236 1490 336 1542 416" stroke="#69DAFF" stroke-opacity="0.55" stroke-width="18" stroke-linecap="round"/>
+    <path d="M118 648C304 632 386 430 560 430C742 430 792 658 972 656C1152 654 1210 440 1370 450C1460 456 1514 516 1570 580" stroke="#69DAFF" stroke-opacity="0.36" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  <g stroke="#69DAFF" stroke-width="3" stroke-linecap="round">
+    <path d="M112 582C292 560 308 314 502 300C682 288 690 616 894 612C1086 608 1124 256 1310 244C1418 236 1490 336 1542 416"/>
+    <path d="M118 648C304 632 386 430 560 430C742 430 792 658 972 656C1152 654 1210 440 1370 450C1460 456 1514 516 1570 580"/>
+  </g>
+  <g fill="#69DAFF">
+    <circle cx="112" cy="582" r="10"/>
+    <circle cx="502" cy="300" r="10"/>
+    <circle cx="894" cy="612" r="10"/>
+    <circle cx="1310" cy="244" r="10"/>
+    <circle cx="560" cy="430" r="8"/>
+    <circle cx="972" cy="656" r="8"/>
+    <circle cx="1370" cy="450" r="8"/>
+  </g>
+  <g stroke="#FF7524" stroke-opacity="0.22" stroke-width="2">
+    <path d="M234 178L372 256"/>
+    <path d="M1260 686L1414 740"/>
+    <path d="M750 170L890 218"/>
+  </g>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071018"/>
+      <stop offset="0.48" stop-color="#06121A"/>
+      <stop offset="1" stop-color="#040608"/>
+    </linearGradient>
+    <filter id="blur" x="76" y="200" width="1530" height="492" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+</svg>

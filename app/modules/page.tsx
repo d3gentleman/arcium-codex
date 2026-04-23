@@ -1,7 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import { getFooterConfig, getModuleLessonPath, getModuleLessons } from "@/lib/content";
-import { MODULES_PAGE_CONFIG } from "@/lib/config";
+import { MODULES_PAGE_CONFIG, MODULE_CATEGORY_ART } from "@/lib/config";
 import { getCompletedLessonSlugs } from "@/lib/lesson-store";
 import { getCurrentSession } from "@/lib/session";
 
@@ -40,26 +41,90 @@ export default async function ModulesPage() {
       <div className="space-y-32">
         {categories.map((category) => {
           const categoryLessons = lessons.filter((lesson) => lesson.categoryId === category.id);
+          const completedCategoryLessons = categoryLessons.filter((lesson) => completedLessons.has(lesson.slug)).length;
+          const categoryArt = MODULE_CATEGORY_ART[category.id];
 
           return (
             <section key={category.id} id={category.id} className="space-y-12 scroll-mt-24">
-              <div className="grid grid-cols-1 gap-8 border-b border-white/5 pb-12 lg:grid-cols-12">
-                <div className="space-y-4 lg:col-span-4">
-                  <div className="flex items-center gap-3">
-                    <h2 className="font-headline text-2xl font-bold uppercase tracking-wider text-white">
-                      {category.title}
-                    </h2>
-                    <div className="rounded-sm border border-primary/20 bg-primary/10 px-2 py-0.5">
-                      <span className="text-[10px] font-mono font-bold text-primary">
-                        CAT_{category.id.toUpperCase().slice(0, 3)}
-                      </span>
+              <div className="space-y-6 border-b border-white/5 pb-12">
+                <div className="overflow-hidden rounded-[1.7rem] border border-outline-variant/20 bg-surface-container-low shadow-[0_16px_60px_rgba(0,0,0,0.35)]">
+                  <div className="relative aspect-[16/9] overflow-hidden lg:aspect-[16/6]">
+                    {categoryArt ? (
+                      <Image
+                        src={categoryArt.src}
+                        alt={categoryArt.alt}
+                        fill
+                        priority={category.id === "fundamentals"}
+                        sizes="(max-width: 1024px) 100vw, 72vw"
+                        className="object-cover"
+                      />
+                    ) : null}
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,7,10,0.08)_0%,rgba(4,7,10,0.18)_30%,rgba(4,7,10,0.72)_72%,rgba(4,7,10,0.96)_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(105,218,255,0.06)_0%,transparent_24%,transparent_76%,rgba(105,218,255,0.04)_100%)]" />
+                    <div className="absolute inset-0 opacity-50" style={{
+                      backgroundImage:
+                        "linear-gradient(rgba(105,218,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(105,218,255,0.08) 1px, transparent 1px)",
+                      backgroundSize: "48px 48px",
+                      maskImage: "linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.9))",
+                    }} />
+
+                    <div className="absolute left-5 top-5 inline-flex border border-primary/20 bg-black/35 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-primary backdrop-blur-sm">
+                      CAT_{category.id.toUpperCase().slice(0, 3)}
+                    </div>
+
+                    <div className="absolute inset-x-0 bottom-0 p-6 lg:p-8">
+                      <div className="max-w-3xl space-y-4">
+                        <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono uppercase tracking-[0.22em] text-primary/85">
+                          <span className="border border-primary/20 bg-black/30 px-3 py-1 backdrop-blur-sm">
+                            {category.title}
+                          </span>
+                          <span>{categoryLessons.length} lessons</span>
+                          <span>{completedCategoryLessons}/{categoryLessons.length} complete</span>
+                        </div>
+                        <div className="space-y-3">
+                          <h2 className="max-w-2xl font-headline text-3xl font-black uppercase tracking-tight text-white lg:text-5xl">
+                            {category.title}
+                          </h2>
+                          <p className="max-w-2xl text-sm leading-7 text-on-surface-variant lg:text-base">
+                            {category.description}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <p className="text-sm leading-relaxed text-on-surface-variant">{category.description}</p>
                 </div>
 
-                <div className="lg:col-span-8">
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+                  <div className="rounded-[1.3rem] border border-outline-variant/20 bg-surface-container-lowest/70 p-5 backdrop-blur-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div className="space-y-2">
+                        <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary/80">
+                          Section Brief
+                        </div>
+                        <p className="max-w-2xl text-sm leading-7 text-on-surface-variant">
+                          Progress through the lessons in this category to build a layered understanding of the Arcium stack, then complete each quiz to mark the material as finished.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-3 text-[10px] font-bold uppercase tracking-[0.18em]">
+                        <Link
+                          href={`#${category.id}`}
+                          className="border border-outline-variant/20 px-4 py-2 text-outline transition-colors hover:text-white"
+                        >
+                          Linked Section
+                        </Link>
+                        <Link
+                          href={categoryLessons[0] ? getModuleLessonPath(categoryLessons[0].slug) : "/modules"}
+                          className="border border-primary/30 bg-primary/10 px-4 py-2 text-primary transition-colors hover:bg-primary/20"
+                        >
+                          {completedCategoryLessons === categoryLessons.length && categoryLessons.length > 0
+                            ? "Review Sequence"
+                            : "Start Sequence"}
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+              <div className="grid grid-cols-1 gap-4">
                     {categoryLessons.map((lesson) => {
                       const progress = completedLessons.has(lesson.slug) ? 100 : 0;
 
@@ -67,8 +132,9 @@ export default async function ModulesPage() {
                         <Link
                           key={lesson.slug}
                           href={getModuleLessonPath(lesson.slug)}
-                          className="group relative overflow-hidden rounded-sm bg-surface-container-low p-6 transition-all duration-500 hover:bg-surface-container-high"
+                          className="group relative overflow-hidden rounded-[1.3rem] border border-outline-variant/18 bg-surface-container-low p-6 transition-all duration-500 hover:border-primary/20 hover:bg-surface-container-high"
                         >
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(105,218,255,0.10),transparent_28%)] opacity-70 transition-opacity group-hover:opacity-100" />
                           <div className="absolute right-0 top-0 -mr-12 -mt-12 h-24 w-24 rounded-full bg-primary/5 blur-3xl transition-colors group-hover:bg-primary/10" />
                           <div className="relative z-10 flex h-full flex-col space-y-6">
                             <div className="flex items-start justify-between">
@@ -105,7 +171,7 @@ export default async function ModulesPage() {
                       );
                     })}
                     {categoryLessons.length === 0 ? (
-                      <div className="rounded-sm border border-dashed border-outline-variant/20 p-6 text-sm text-on-surface-variant">
+                      <div className="rounded-[1.3rem] border border-dashed border-outline-variant/20 p-6 text-sm text-on-surface-variant">
                         No lessons have been published in this category yet.
                       </div>
                     ) : null}

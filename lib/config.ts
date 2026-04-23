@@ -1,5 +1,34 @@
 import { FooterConfig, LinkAction, UIConfig } from "@/types/domain";
 
+export const MODULE_CATEGORY_ART: Record<
+  string,
+  {
+    src: string;
+    alt: string;
+  }
+> = {
+  fundamentals: {
+    src: "/images/modules/fundamentals.svg",
+    alt: "Abstract foundational lattice with a central signal core and layered system geometry.",
+  },
+  architecture: {
+    src: "/images/modules/architecture.svg",
+    alt: "Abstract distributed topology showing structured nodes, routes, and infrastructure planes.",
+  },
+  execution: {
+    src: "/images/modules/execution.svg",
+    alt: "Abstract runtime image with controlled compute channels and flowing execution paths.",
+  },
+  security: {
+    src: "/images/modules/security.svg",
+    alt: "Abstract verification mesh with constrained signal corridors and integrity boundaries.",
+  },
+  economics: {
+    src: "/images/modules/economics.svg",
+    alt: "Abstract strategic circulation system showing network flows, reserves, and balanced channels.",
+  },
+};
+
 export const NAVIGATION_CONFIG: LinkAction[] = [
   {
     type: "internal",
