@@ -38,7 +38,7 @@ function RegisterPageContent() {
       return;
     }
 
-    setSuccess("Account created. Verify your email in Mailpit, then sign in.");
+    setSuccess("Account created successfully.");
     setIsSubmitting(false);
     router.push(`/login?registered=1&callbackUrl=${encodeURIComponent(callbackUrl)}`);
   }

@@ -295,7 +295,7 @@ export const MODULES_PAGE_CONFIG = {
       description: "The core concepts and historical context of the Arcium protocol.",
       modules: [
         { id: "intro", title: "Introduction to Codex", progress: 100, tag: "CORE" },
-        { id: "history", title: "Network Evolution", progress: 65, tag: "HISTORY" }
+        { id: "privacy-paradigm", title: "Redefining the Privacy Paradigm", progress: 0, tag: "PARADIGM" }
       ]
     },
     {

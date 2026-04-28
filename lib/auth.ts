@@ -1,7 +1,6 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { db } from "@/lib/db";
-import { sendMail } from "@/lib/mail";
 
 function getBaseUrl() {
   return process.env.BETTER_AUTH_URL || "http://localhost:3000";
@@ -14,24 +13,20 @@ export const auth = betterAuth({
   database: db,
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
-    sendResetPassword: async ({ user, url }) => {
-      void sendMail({
-        to: user.email,
-        subject: "Reset your Learn Arcium password",
-        text: `Reset your password by opening this link:\n\n${url}`,
-      });
-    },
+    requireEmailVerification: false,
   },
-  emailVerification: {
-    sendOnSignUp: true,
-    autoSignInAfterVerification: true,
-    sendVerificationEmail: async ({ user, url }) => {
-      void sendMail({
-        to: user.email,
-        subject: "Verify your Learn Arcium account",
-        text: `Verify your email address by opening this link:\n\n${url}`,
-      });
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          return {
+            data: {
+              ...user,
+              emailVerified: true,
+            },
+          };
+        },
+      },
     },
   },
   user: {

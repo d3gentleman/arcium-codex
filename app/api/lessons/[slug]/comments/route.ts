@@ -10,8 +10,8 @@ export async function POST(
   const { slug } = await params;
   const session = await auth.api.getSession({ headers: request.headers });
 
-  if (!session?.user || !session.user.emailVerified) {
-    return NextResponse.json({ error: "You must verify your email before commenting." }, { status: 401 });
+  if (!session?.user) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
   const body = (await request.json()) as { body?: string };

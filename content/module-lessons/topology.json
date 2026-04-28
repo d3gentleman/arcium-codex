@@ -4,6 +4,7 @@
   "categoryId": "architecture",
   "tag": "NET",
   "summary": "A high-level lesson on thinking about participating nodes, shared coordination, and where confidential execution fits into network shape.",
+  "visualizationId": "network-topology-demo",
   "bodySections": [
     {
       "title": "Coordination Surface",

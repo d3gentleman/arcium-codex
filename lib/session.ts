@@ -10,7 +10,7 @@ export async function getCurrentSession() {
 export async function requireVerifiedSession() {
   const session = await getCurrentSession();
 
-  if (!session?.user || !session.user.emailVerified) {
+  if (!session?.user) {
     return null;
   }
 

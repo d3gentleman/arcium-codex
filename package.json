@@ -26,7 +26,6 @@
     "gsap": "^3.15.0",
     "lucide-react": "^1.11.0",
     "next": "16.2.4",
-    "nodemailer": "^7.0.10",
     "pg": "^8.16.3",
     "react": "19.2.5",
     "react-dom": "19.2.5",
@@ -36,7 +35,6 @@
   "devDependencies": {
     "@opentelemetry/api": "^1.9.1",
     "@types/node": "^20",
-    "@types/nodemailer": "^8.0.0",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

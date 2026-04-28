@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Footer from "@/components/Footer";
 import LessonCommentForm from "@/components/modules/LessonCommentForm";
 import LessonQuizForm from "@/components/modules/LessonQuizForm";
+import VisualizationRegistry from "@/components/modules/visualizations/VisualizationRegistry";
 import {
   getFooterConfig,
   getModuleLessonBySlug,
@@ -39,7 +40,7 @@ export default async function ModuleLessonPage({ params }: ModuleLessonPageProps
     listLessonComments(slug),
   ]);
 
-  const canInteract = Boolean(session?.user && session.user.emailVerified);
+  const canInteract = Boolean(session?.user);
   const completed = session?.user ? await isLessonCompleted(session.user.id, slug) : false;
 
   return (
@@ -57,7 +58,7 @@ export default async function ModuleLessonPage({ params }: ModuleLessonPageProps
           <h1 className="max-w-4xl font-headline text-4xl font-black uppercase tracking-tight text-white lg:text-6xl">
             {lesson.title}
           </h1>
-          <p className="max-w-3xl text-lg leading-8 text-on-surface-variant">{lesson.summary}</p>
+          <p className="max-w-3xl text-lg leading-8 text-on-surface-variant font-medium">{lesson.summary}</p>
         </div>
         <aside className="space-y-4">
           <div className="rounded-[1.4rem] border border-outline-variant/25 bg-surface-container-lowest p-5">
@@ -84,21 +85,55 @@ export default async function ModuleLessonPage({ params }: ModuleLessonPageProps
         </aside>
       </section>
 
-      <section className="space-y-5">
+      <div className="mx-auto max-w-[65ch] space-y-12">
+        {lesson.introduction && (
+          <section className="space-y-4">
+            <h2 className="text-sm font-bold uppercase tracking-[0.24em] text-primary">Introduction</h2>
+            <p className="text-lg leading-relaxed text-white/90">{lesson.introduction}</p>
+          </section>
+        )}
+
         {lesson.bodySections.map((section) => (
-          <article
-            key={section.title}
-            className="rounded-[1.4rem] border border-outline-variant/25 bg-surface-container-lowest p-6"
-          >
-            <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.24em] text-primary">{section.title}</div>
-            <div className="space-y-4 text-sm leading-7 text-on-surface-variant">
+          <article key={section.title} className="space-y-6">
+            <h3 className="font-headline text-2xl font-bold uppercase tracking-wide text-white">{section.title}</h3>
+            
+            {section.visual && (
+              <div className="w-full rounded-[1.2rem] border border-outline-variant/20 bg-surface-container overflow-hidden my-6">
+                <div className="aspect-[16/9] flex items-center justify-center bg-black/40 relative">
+                  {section.visual.src ? (
+                    <img 
+                      src={section.visual.src} 
+                      alt={section.visual.alt || section.title} 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs text-on-surface-variant uppercase tracking-widest font-mono">
+                      [{(section.visual.type || 'IMAGE').toUpperCase()} ASSET PLACEHOLDER]
+                    </span>
+                  )}
+                </div>
+                {section.visual.caption && (
+                  <div className="border-t border-outline-variant/20 px-4 py-3 text-xs text-on-surface-variant">
+                    {section.visual.caption}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="space-y-4 text-base leading-8 text-on-surface-variant">
               {section.body.split("\n\n").map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
               ))}
             </div>
           </article>
         ))}
-      </section>
+      </div>
+
+      {lesson.visualizationId && (
+        <section className="mx-auto max-w-5xl">
+          <VisualizationRegistry id={lesson.visualizationId} />
+        </section>
+      )}
 
       <section className="rounded-[1.6rem] border border-outline-variant/25 bg-surface-container-high/30 p-6">
         <div className="mb-6 flex items-center justify-between gap-4">
@@ -144,7 +179,7 @@ export default async function ModuleLessonPage({ params }: ModuleLessonPageProps
             ))
           ) : (
             <div className="rounded-[1.2rem] border border-dashed border-outline-variant/25 p-5 text-sm text-on-surface-variant">
-              No comments yet. Be the first verified learner to add one.
+              No comments yet. Be the first learner to add one.
             </div>
           )}
         </div>

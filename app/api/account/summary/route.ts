@@ -28,7 +28,6 @@ export async function GET(request: Request) {
     user: {
       name: session.user.username || session.user.name || session.user.email,
       email: session.user.email,
-      emailVerified: session.user.emailVerified,
     },
     progress: {
       completedLessons: completedLessonSlugs.length,

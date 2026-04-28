@@ -1,0 +1,67 @@
+{
+  "slug": "privacy-paradigm",
+  "title": "Redefining the Privacy Paradigm",
+  "categoryId": "fundamentals",
+  "tag": "PARADIGM",
+  "summary": "A deep dive into the fundamental shift from traditional cleartext computation to Arcium's encrypted execution model.",
+  "introduction": "In the digital age, we have long accepted a dangerous trade-off: to use data, we must expose it. Arcium challenges this status quo by introducing a new privacy paradigm where data remains encrypted even during active computation.",
+  "bodySections": [
+    {
+      "title": "The Decryption Dilemma",
+      "body": "Traditional computing requires data to be in 'cleartext' (decrypted) to be processed. This creates a massive attack surface: once data is decrypted in memory, it is vulnerable to rogue administrators, side-channel attacks, and OS-level breaches. This centralized trust model is the primary driver behind modern data leaks.",
+      "visual": {
+        "type": "image",
+        "src": "/images/lessons/decryption-dilemma.png",
+        "alt": "Diagram showing the vulnerability of cleartext data in memory",
+        "caption": "The traditional compute model: a single point of failure where data must be exposed to be used."
+      }
+    },
+    {
+      "title": "The Benefits of Encrypted Processing",
+      "body": "Arcium utilizes Multi-Party Computation (MPC) and Secret Sharing to process data without ever decrypting it. Benefits include:\n\n1. Zero Trust: No single node ever sees the full data.\n2. Permanent Encryption: Data is encrypted at rest, in transit, and significantly, during execution.\n3. Compliance-by-Design: Automated adherence to privacy regulations like GDPR through cryptographic enforcement rather than just policy.",
+      "visual": {
+        "type": "image",
+        "src": "/images/lessons/encrypted-compute-flow.png",
+        "alt": "Visualization of MPC nodes processing encrypted shares",
+        "caption": "Arcium's Paradigm: Nodes collaborate on encrypted shares to produce a result without seeing the inputs."
+      }
+    },
+    {
+      "title": "Encrypted Shared State",
+      "body": "Perhaps the most powerful feature is the 'Encrypted Shared State.' Multiple independent parties can contribute secret inputs to a shared computation. The network performs the logic across these combined secrets and returns only the final output. This allows competitors to collaborate on shared insights—such as financial risk models or medical benchmarks—without any party ever revealing their proprietary data to others.",
+      "visual": {
+        "type": "image",
+        "src": "/images/lessons/shared-state.png",
+        "alt": "Multiple parties contributing to a central encrypted compute core",
+        "caption": "Encrypted Shared State: Collaborative intelligence without data exposure."
+      }
+    }
+  ],
+  "quizQuestions": [
+    {
+      "id": "decryption-risk",
+      "type": "short_text",
+      "prompt": "What is the primary vulnerability of traditional computing mentioned in this lesson?",
+      "required": true,
+      "choices": []
+    },
+    {
+      "id": "mpc-benefit",
+      "type": "multiple_choice",
+      "prompt": "Which of these is a direct benefit of Arcium's encrypted processing?",
+      "required": true,
+      "choices": [
+        "Data is never decrypted, even during execution",
+        "Computation is performed by a single trusted server",
+        "It eliminates the need for encryption at rest"
+      ]
+    },
+    {
+      "id": "shared-state-use",
+      "type": "short_text",
+      "prompt": "What does 'Encrypted Shared State' allow multiple parties to do safely?",
+      "required": true,
+      "choices": []
+    }
+  ]
+}

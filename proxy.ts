@@ -27,7 +27,7 @@ export async function proxy(request: NextRequest) {
 
   const allowedEmails = getAllowedEmails();
   const email = session.user.email.toLowerCase();
-  const isAuthorized = session.user.emailVerified && allowedEmails.includes(email);
+  const isAuthorized = allowedEmails.includes(email);
 
   if (isAuthorized) {
     return NextResponse.next();

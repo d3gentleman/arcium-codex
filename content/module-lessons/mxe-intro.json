@@ -4,10 +4,18 @@
   "categoryId": "execution",
   "tag": "COMPUTE",
   "summary": "A beginner-oriented explanation of MXEs as the execution surfaces where confidential workloads become concrete.",
+  "introduction": "Before we dive deep into protocol specifics, we need to understand what an MXE is and why Multi-Party Computation (MPC) relies on it. An MXE is the arena where computation happens without revealing the underlying data.",
+  "visualizationId": "mpc-mxe-demo",
   "bodySections": [
     {
       "title": "Execution Surface",
-      "body": "MXE stands for MPC eXecution Environment. In the atlas, it refers to the place where protected computation happens in a way that is operationally meaningful to applications.\n\nThis is the bridge between theory and product behavior: confidential logic needs a place to execute, and MXEs are that place."
+      "body": "MXE stands for MPC eXecution Environment. In the atlas, it refers to the place where protected computation happens in a way that is operationally meaningful to applications.\n\nThis is the bridge between theory and product behavior: confidential logic needs a place to execute, and MXEs are that place.",
+      "visual": {
+        "type": "image",
+        "src": "/images/lessons/mxe-surface.png",
+        "alt": "MXE Execution Surface Visualization",
+        "caption": "A conceptual visualization of an MXE: the secure arena where multi-party computation logic becomes concrete execution."
+      }
     },
     {
       "title": "Application View",

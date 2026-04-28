@@ -27,6 +27,22 @@ const mapNodePriorityOptions = [
 const bodySectionFields = {
   title: fields.text({ label: 'Section Title' }),
   body: fields.text({ label: 'Body content', multiline: true }),
+  visual: fields.object({
+    type: fields.select({
+      label: 'Asset Type',
+      options: [
+        { label: 'Image', value: 'image' },
+        { label: 'Diagram', value: 'diagram' },
+        { label: 'Code', value: 'code' },
+      ],
+      defaultValue: 'image'
+    }),
+    src: fields.text({ label: 'Image Source' }),
+    alt: fields.text({ label: 'Alt Text' }),
+    caption: fields.text({ label: 'Caption' }),
+    codeSnippet: fields.text({ label: 'Code Snippet', multiline: true }),
+    language: fields.text({ label: 'Language (e.g. typescript)' }),
+  }),
 };
 
 const quizQuestionFields = {
@@ -122,6 +138,8 @@ export default config({
         categoryId: fields.text({ label: 'Category ID' }),
         tag: fields.text({ label: 'Tag' }),
         summary: fields.text({ label: 'Summary', multiline: true }),
+        introduction: fields.text({ label: 'Introduction', multiline: true }),
+        visualizationId: fields.text({ label: 'Visualization ID' }),
         bodySections: fields.array(fields.object(bodySectionFields), {
           label: 'Body Sections',
           itemLabel: (props) => props.fields.title.value,

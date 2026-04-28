@@ -48,7 +48,7 @@ function LoginPageContent() {
     <AuthShell title="Learner Login" eyebrow="ACCOUNT_ACCESS_V1" subtitle="Email / Password">
       {registered ? (
         <p className="mb-4 text-sm leading-7 text-primary">
-          Account created. Check Mailpit for your verification email before signing in.
+          Account created successfully. You can now sign in.
         </p>
       ) : null}
       {isPending ? (
@@ -87,9 +87,6 @@ function LoginPageContent() {
           <div className="flex justify-between text-[11px] uppercase tracking-[0.18em] text-on-surface-variant/70">
             <Link href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="hover:text-primary">
               Create Account
-            </Link>
-            <Link href="/forgot-password" className="hover:text-primary">
-              Reset Password
             </Link>
           </div>
         </form>

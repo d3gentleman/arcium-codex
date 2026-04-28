@@ -10,7 +10,6 @@ interface AccountSummary {
   user?: {
     name: string;
     email: string;
-    emailVerified: boolean;
   };
   progress?: {
     completedLessons: number;
@@ -23,7 +22,7 @@ interface AccountSummary {
   };
 }
 
-const HIDDEN_PREFIXES = ["/keystatic", "/login", "/register", "/forgot-password", "/reset-password"];
+const HIDDEN_PREFIXES = ["/keystatic", "/login", "/register"];
 
 export default function TopAccountBar() {
   const pathname = usePathname();

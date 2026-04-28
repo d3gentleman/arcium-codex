@@ -19,9 +19,19 @@ export interface UIConfig {
   [key: string]: string;
 }
 
+export interface VisualAsset {
+  type: 'image' | 'diagram' | 'code';
+  src?: string;
+  alt?: string;
+  caption?: string;
+  codeSnippet?: string;
+  language?: string;
+}
+
 export interface BodySection {
   title: string;
   body: string;
+  visual?: VisualAsset;
 }
 
 export type QuizQuestion =
@@ -75,7 +85,9 @@ export interface ModuleLessonRecord {
   categoryId: string;
   tag: string;
   summary: string;
+  introduction?: string;
   bodySections: BodySection[];
+  visualizationId?: string;
   quizQuestions: QuizQuestion[];
 }
 
