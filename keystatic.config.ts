@@ -127,29 +127,6 @@ export default config({
         relatedCategoryId: fields.text({ label: 'Related Category ID' }),
       },
     }),
-    moduleLessons: collection({
-      label: 'Module Lessons',
-      slugField: 'slug',
-      path: 'content/module-lessons/*',
-      format: { data: 'json' },
-      schema: {
-        slug: fields.slug({ name: { label: 'Slug' } }),
-        title: fields.text({ label: 'Title' }),
-        categoryId: fields.text({ label: 'Category ID' }),
-        tag: fields.text({ label: 'Tag' }),
-        summary: fields.text({ label: 'Summary', multiline: true }),
-        introduction: fields.text({ label: 'Introduction', multiline: true }),
-        visualizationId: fields.text({ label: 'Visualization ID' }),
-        bodySections: fields.array(fields.object(bodySectionFields), {
-          label: 'Body Sections',
-          itemLabel: (props) => props.fields.title.value,
-        }),
-        quizQuestions: fields.array(fields.object(quizQuestionFields), {
-          label: 'Quiz Questions',
-          itemLabel: (props) => props.fields.prompt.value,
-        }),
-      },
-    }),
     glossaryTerms: collection({
       label: 'Glossary Terms',
       slugField: 'slug',

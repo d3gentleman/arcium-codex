@@ -24,6 +24,7 @@ export default function ShellSwitcher({ children, discoveryItems, navLinks, ui }
   // Define paths that should NOT have the global DiscoveryShell
   const isAdminPath =
     pathname.startsWith('/keystatic') ||
+    pathname.startsWith('/staff') ||
     pathname.startsWith('/login') ||
     pathname.startsWith('/register') ||
     pathname.startsWith('/forgot-password') ||

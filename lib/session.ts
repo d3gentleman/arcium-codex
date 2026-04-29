@@ -16,3 +16,13 @@ export async function requireVerifiedSession() {
 
   return session;
 }
+
+export async function requireStaffSession() {
+  const session = await getCurrentSession();
+
+  if (!session?.user || (session.user.role !== 'admin' && session.user.role !== 'staff')) {
+    throw new Error("Unauthorized");
+  }
+
+  return session;
+}

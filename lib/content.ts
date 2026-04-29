@@ -1,3 +1,4 @@
+import { query } from './db';
 import { createReader } from '@keystatic/core/reader';
 import keystaticConfig from '@/keystatic.config';
 import { 
@@ -73,22 +74,53 @@ export async function getKnowledgeArticlesByCategoryId(categoryId: string | unde
 // --- MODULE LESSONS ---
 
 export async function getModuleLessons(): Promise<ModuleLessonRecord[]> {
-  const lessons = await reader.collections.moduleLessons.all();
-  return lessons.map((lesson) => ({
-    ...lesson.entry,
-    slug: lesson.slug,
+  const result = await query('SELECT * FROM module_lesson ORDER BY created_at ASC');
+  return result.rows.map((row) => ({
+    slug: row.slug,
+    title: row.title,
+    categoryId: row.category_id,
+    tag: row.tag,
+    summary: row.summary,
+    introductionHeading: row.introduction_heading || undefined,
+    introduction: row.introduction || undefined,
+    bodySections: row.body_sections,
+    visualizationId: row.visualization_id || undefined,
+    quizQuestions: row.quiz_questions,
   })) as ModuleLessonRecord[];
 }
 
 export async function getModuleLessonBySlug(slug: string): Promise<ModuleLessonRecord | null> {
-  const lesson = await reader.collections.moduleLessons.read(slug);
-  if (!lesson) return null;
-  return { ...lesson, slug } as ModuleLessonRecord;
+  const result = await query('SELECT * FROM module_lesson WHERE slug = $1', [slug]);
+  if (result.rowCount === 0) return null;
+  const row = result.rows[0];
+  return {
+    slug: row.slug,
+    title: row.title,
+    categoryId: row.category_id,
+    tag: row.tag,
+    summary: row.summary,
+    introductionHeading: row.introduction_heading || undefined,
+    introduction: row.introduction || undefined,
+    bodySections: row.body_sections,
+    visualizationId: row.visualization_id || undefined,
+    quizQuestions: row.quiz_questions,
+  } as ModuleLessonRecord;
 }
 
 export async function getModuleLessonsByCategoryId(categoryId: string): Promise<ModuleLessonRecord[]> {
-  const lessons = await getModuleLessons();
-  return lessons.filter((lesson) => lesson.categoryId === categoryId);
+  const result = await query('SELECT * FROM module_lesson WHERE category_id = $1 ORDER BY created_at ASC', [categoryId]);
+  return result.rows.map((row) => ({
+    slug: row.slug,
+    title: row.title,
+    categoryId: row.category_id,
+    tag: row.tag,
+    summary: row.summary,
+    introductionHeading: row.introduction_heading || undefined,
+    introduction: row.introduction || undefined,
+    bodySections: row.body_sections,
+    visualizationId: row.visualization_id || undefined,
+    quizQuestions: row.quiz_questions,
+  })) as ModuleLessonRecord[];
 }
 
 // --- GLOSSARY ---

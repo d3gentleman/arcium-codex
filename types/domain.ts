@@ -85,6 +85,7 @@ export interface ModuleLessonRecord {
   categoryId: string;
   tag: string;
   summary: string;
+  introductionHeading?: string;
   introduction?: string;
   bodySections: BodySection[];
   visualizationId?: string;
