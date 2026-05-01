@@ -69,6 +69,54 @@ export function scoreQuizAnswers(
     const points = question.points ?? 1;
     totalPoints += points;
 
+    // Handle different question types
+    if (question.type === "checkbox") {
+      const result = scoreCheckboxQuestion(question, userAnswer, points);
+      earnedPoints += result.earned;
+      results.push({
+        questionId: question.id,
+        correct: result.correct,
+        points,
+        earned: result.earned,
+        userAnswer,
+        correctAnswer: question.correctAnswers?.join(", ") || "",
+        explanation: question.explanation,
+      });
+      continue;
+    }
+
+    if (question.type === "true_false") {
+      const correct = question.correctAnswer !== undefined && 
+        userAnswer === String(question.correctAnswer);
+      const earned = correct ? points : 0;
+      earnedPoints += earned;
+      results.push({
+        questionId: question.id,
+        correct,
+        points,
+        earned,
+        userAnswer,
+        correctAnswer: String(question.correctAnswer),
+        explanation: question.explanation,
+      });
+      continue;
+    }
+
+    if (question.type === "code_fill_in") {
+      const result = scoreCodeFillInQuestion(question, answers, points);
+      earnedPoints += result.earned;
+      results.push({
+        questionId: question.id,
+        correct: result.correct,
+        points,
+        earned: result.earned,
+        userAnswer: result.userAnswer,
+        correctAnswer: result.correctAnswer,
+        explanation: question.explanation,
+      });
+      continue;
+    }
+
     // Skip grading if no correct answer defined (open-ended)
     if (!question.correctAnswer) {
       results.push({
@@ -107,6 +155,72 @@ export function scoreQuizAnswers(
     percentage,
     passed,
     questionResults: results,
+  };
+}
+
+function scoreCheckboxQuestion(
+  question: { correctAnswers?: string[] },
+  userAnswer: string,
+  points: number
+): { correct: boolean; earned: number } {
+  if (!question.correctAnswers || question.correctAnswers.length === 0) {
+    return { correct: false, earned: 0 };
+  }
+
+  const correctAnswers = question.correctAnswers;
+  let userAnswers: string[] = [];
+  
+  try {
+    userAnswers = JSON.parse(userAnswer || "[]");
+  } catch {
+    userAnswers = userAnswer ? [userAnswer] : [];
+  }
+
+  // Calculate partial credit
+  const correctSelected = userAnswers.filter(a => correctAnswers.includes(a)).length;
+  const incorrectSelected = userAnswers.filter(a => !correctAnswers.includes(a)).length;
+  const correctMissed = correctAnswers.filter(a => !userAnswers.includes(a)).length;
+
+  // All-or-nothing scoring: must get all correct and no incorrect
+  const allCorrect = correctSelected === correctAnswers.length && incorrectSelected === 0;
+  
+  // Partial credit option: weight correct selections, penalize incorrect
+  // Formula: (correctSelected - incorrectSelected) / totalCorrectAnswers, min 0
+  const pointsPerCorrect = question.correctAnswers?.length ? 
+    Math.max(0, (correctSelected - incorrectSelected * 0.5) / correctAnswers.length) : 0;
+  
+  const earned = Math.round(points * pointsPerCorrect * 10) / 10;
+  
+  return { correct: allCorrect, earned: allCorrect ? points : earned };
+}
+
+function scoreCodeFillInQuestion(
+  question: { correctAnswers?: string[]; blankCount: number; id: string },
+  answers: Record<string, string>,
+  points: number
+): { correct: boolean; earned: number; userAnswer: string; correctAnswer: string } {
+  const blankAnswers: string[] = [];
+  const correctAnswers = question.correctAnswers || [];
+  
+  for (let i = 0; i < question.blankCount; i++) {
+    blankAnswers.push(answers[`${question.id}_blank_${i}`] || "");
+  }
+
+  let correctCount = 0;
+  for (let i = 0; i < question.blankCount; i++) {
+    const user = normalizeAnswer(blankAnswers[i]);
+    const correct = normalizeAnswer(correctAnswers[i] || "");
+    if (user === correct) correctCount++;
+  }
+
+  const earned = Math.round((correctCount / question.blankCount) * points * 10) / 10;
+  const allCorrect = correctCount === question.blankCount;
+
+  return {
+    correct: allCorrect,
+    earned,
+    userAnswer: blankAnswers.join(", "),
+    correctAnswer: correctAnswers.join(", "),
   };
 }
 
@@ -189,6 +303,42 @@ function validateAnswer(question: QuizQuestion, answer: unknown) {
         error: `Invalid answer for "${question.prompt}".`,
       };
     }
+  }
+
+  if (question.type === "checkbox") {
+    let selected: string[] = [];
+    try {
+      selected = JSON.parse(raw);
+    } catch {
+      selected = raw ? [raw] : [];
+    }
+    // Validate each selected choice is valid
+    for (const choice of selected) {
+      if (!question.choices.includes(choice)) {
+        return {
+          ok: false as const,
+          error: `Invalid answer for "${question.prompt}".`,
+        };
+      }
+    }
+  }
+
+  if (question.type === "true_false") {
+    if (raw !== "true" && raw !== "false") {
+      return {
+        ok: false as const,
+        error: `Invalid answer for "${question.prompt}". Must be true or false.`,
+      };
+    }
+  }
+
+  if (question.type === "code_fill_in") {
+    // Code fill-in answers are stored per blank
+    // We'll validate at submission time
+    return {
+      ok: true as const,
+      value: raw,
+    };
   }
 
   if (question.type === "short_text" && raw.length > 500) {

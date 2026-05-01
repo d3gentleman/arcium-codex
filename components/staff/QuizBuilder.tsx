@@ -15,7 +15,10 @@ import {
   Eye,
   EyeOff,
   Lightbulb,
-  HelpCircle
+  HelpCircle,
+  CheckSquare,
+  ToggleLeft,
+  Code,
 } from "lucide-react";
 
 interface QuizBuilderProps {
@@ -37,8 +40,14 @@ interface DraftQuestion {
   hint?: string;
   explanation?: string;
   correctAnswer?: string;
+  correctAnswers?: string[];
   choices?: string[];
   requiresManualGrading?: boolean;
+  // Code fill-in fields
+  codeSnippet?: string;
+  language?: string;
+  blankCount?: number;
+  hints?: string[];
 }
 
 const generateId = () => `q-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
@@ -56,29 +65,82 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
 
   const startCreating = (type: QuizQuestion['type']) => {
     setMode({ type: 'creating', questionType: type });
-    setDraft({
+    const baseDraft = {
       type,
       prompt: '',
       required: true,
       points: 1,
-      choices: type === 'multiple_choice' ? ['', ''] : undefined,
-    });
+    };
+    
+    if (type === 'multiple_choice' || type === 'checkbox') {
+      setDraft({ ...baseDraft, choices: ['', ''], correctAnswers: type === 'checkbox' ? [] : undefined });
+    } else if (type === 'true_false') {
+      setDraft({ ...baseDraft, correctAnswer: 'true' });
+    } else if (type === 'code_fill_in') {
+      setDraft({ 
+        ...baseDraft, 
+        codeSnippet: '',
+        language: 'javascript',
+        blankCount: 1,
+        hints: [''],
+        correctAnswers: ['']
+      });
+    } else {
+      setDraft(baseDraft);
+    }
   };
 
   const startEditing = (question: QuizQuestion) => {
     setMode({ type: 'editing', questionId: question.id });
-    setDraft({
+    const baseDraft = {
       id: question.id,
       type: question.type,
       prompt: question.prompt,
       required: question.required,
       points: question.points ?? 1,
-      hint: question.hint,
-      explanation: question.explanation,
-      correctAnswer: question.correctAnswer,
-      choices: question.type === 'multiple_choice' ? [...question.choices] : undefined,
-      requiresManualGrading: question.type === 'long_text' ? question.requiresManualGrading : undefined,
-    });
+    };
+    
+    if (question.type === 'multiple_choice') {
+      setDraft({
+        ...baseDraft,
+        hint: question.hint,
+        explanation: question.explanation,
+        correctAnswer: question.correctAnswer,
+        choices: [...question.choices],
+      });
+    } else if (question.type === 'checkbox') {
+      setDraft({
+        ...baseDraft,
+        hint: question.hint,
+        explanation: question.explanation,
+        correctAnswers: question.correctAnswers ? [...question.correctAnswers] : [],
+        choices: [...question.choices],
+      });
+    } else if (question.type === 'true_false') {
+      setDraft({
+        ...baseDraft,
+        hint: question.hint,
+        explanation: question.explanation,
+        correctAnswer: question.correctAnswer !== undefined ? String(question.correctAnswer) : undefined,
+      });
+    } else if (question.type === 'code_fill_in') {
+      setDraft({
+        ...baseDraft,
+        codeSnippet: question.codeSnippet,
+        language: question.language,
+        blankCount: question.blankCount,
+        hints: question.hints ? [...question.hints] : [''],
+        correctAnswers: question.correctAnswers ? [...question.correctAnswers] : [''],
+      });
+    } else {
+      setDraft({
+        ...baseDraft,
+        hint: question.hint,
+        explanation: question.explanation,
+        correctAnswer: question.correctAnswer,
+        requiresManualGrading: question.type === 'long_text' ? question.requiresManualGrading : undefined,
+      });
+    }
   };
 
   const cancelEditing = () => {
@@ -89,7 +151,8 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
   const finalizeQuestion = () => {
     if (!draft || !draft.prompt.trim()) return;
 
-    const question: QuizQuestion = {
+    let question: QuizQuestion;
+    const baseQuestion = {
       id: draft.id || generateId(),
       type: draft.type,
       prompt: draft.prompt.trim(),
@@ -97,12 +160,52 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
       points: draft.points,
       ...(draft.hint && { hint: draft.hint.trim() }),
       ...(draft.explanation && { explanation: draft.explanation.trim() }),
-      ...(draft.correctAnswer && { correctAnswer: draft.correctAnswer.trim() }),
-      ...(draft.type === 'multiple_choice' && draft.choices && {
-        choices: draft.choices.filter(c => c.trim()).map(c => c.trim())
-      }),
-      ...(draft.type === 'long_text' && { requiresManualGrading: draft.requiresManualGrading }),
-    } as QuizQuestion;
+    };
+    
+    if (draft.type === 'multiple_choice') {
+      question = {
+        ...baseQuestion,
+        type: 'multiple_choice',
+        choices: (draft.choices || []).filter(c => c.trim()).map(c => c.trim()),
+        ...(draft.correctAnswer && { correctAnswer: draft.correctAnswer.trim() }),
+      };
+    } else if (draft.type === 'checkbox') {
+      question = {
+        ...baseQuestion,
+        type: 'checkbox',
+        choices: (draft.choices || []).filter(c => c.trim()).map(c => c.trim()),
+        correctAnswers: draft.correctAnswers || [],
+      };
+    } else if (draft.type === 'true_false') {
+      question = {
+        ...baseQuestion,
+        type: 'true_false',
+        correctAnswer: draft.correctAnswer === 'true',
+      };
+    } else if (draft.type === 'code_fill_in') {
+      question = {
+        ...baseQuestion,
+        type: 'code_fill_in',
+        codeSnippet: draft.codeSnippet || '',
+        language: draft.language || 'javascript',
+        blankCount: draft.blankCount || 1,
+        hints: (draft.hints || []).filter(h => h.trim()),
+        correctAnswers: (draft.correctAnswers || []).filter(a => a.trim()),
+      };
+    } else if (draft.type === 'long_text') {
+      question = {
+        ...baseQuestion,
+        type: 'long_text',
+        ...(draft.correctAnswer && { correctAnswer: draft.correctAnswer.trim() }),
+        requiresManualGrading: draft.requiresManualGrading,
+      };
+    } else {
+      question = {
+        ...baseQuestion,
+        type: draft.type,
+        ...(draft.correctAnswer && { correctAnswer: draft.correctAnswer.trim() }),
+      };
+    }
 
     if (mode.type === 'editing') {
       updateQuestions(questions.map(q => q.id === question.id ? question : q));
@@ -148,6 +251,13 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
     if (draft.type === 'multiple_choice') {
       const validChoices = (draft.choices || []).filter(c => c.trim());
       return validChoices.length >= 2 && draft.correctAnswer && validChoices.includes(draft.correctAnswer);
+    }
+    if (draft.type === 'checkbox') {
+      const validChoices = (draft.choices || []).filter(c => c.trim());
+      return validChoices.length >= 2;
+    }
+    if (draft.type === 'code_fill_in') {
+      return !!(draft.codeSnippet?.trim() && draft.language?.trim() && draft.blankCount && draft.blankCount > 0);
     }
     return true;
   };
@@ -225,8 +335,65 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
             </div>
           )}
 
+          {/* Checkbox Options (shared UI for multiple_choice and checkbox) */}
+          {(draft.type === 'multiple_choice' || draft.type === 'checkbox') && (
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-white/50">
+                {draft.type === 'checkbox' ? 'Options (Select all that apply)' : 'Choices'}
+              </label>
+              {draft.choices?.map((choice, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={choice}
+                    onChange={(e) => {
+                      const newChoices = [...(draft.choices || [])];
+                      newChoices[i] = e.target.value;
+                      updateDraft({ choices: newChoices });
+                    }}
+                    className="flex-1 bg-black border border-white/10 rounded-sm px-3 py-2 text-sm text-white focus:border-arcium-blue focus:outline-none"
+                    placeholder={`Choice ${i + 1}`}
+                  />
+                  {draft.type === 'checkbox' && (
+                    <input
+                      type="checkbox"
+                      checked={draft.correctAnswers?.includes(choice) && choice.trim() !== ''}
+                      onChange={(e) => {
+                        const current = draft.correctAnswers || [];
+                        const updated = e.target.checked
+                          ? [...current, choice]
+                          : current.filter(c => c !== choice);
+                        updateDraft({ correctAnswers: updated });
+                      }}
+                      className="w-4 h-4 accent-arcium-blue"
+                      title="Mark as correct"
+                    />
+                  )}
+                  {draft.choices && draft.choices.length > 2 && (
+                    <button
+                      onClick={() => {
+                        const newChoices = draft.choices?.filter((_, idx) => idx !== i);
+                        const newCorrect = draft.correctAnswers?.filter(c => c !== choice);
+                        updateDraft({ choices: newChoices, correctAnswers: newCorrect });
+                      }}
+                      className="text-red-500/50 hover:text-red-500"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                onClick={() => updateDraft({ choices: [...(draft.choices || []), ''] })}
+                className="text-xs text-arcium-blue hover:text-white uppercase tracking-widest"
+              >
+                + Add Choice
+              </button>
+            </div>
+          )}
+
           {/* Correct Answer */}
-          {draft.type !== 'long_text' && (
+          {draft.type !== 'long_text' && draft.type !== 'checkbox' && draft.type !== 'code_fill_in' && (
             <div className="space-y-1">
               <label className="text-xs font-bold uppercase tracking-widest text-white/50">
                 Correct Answer
@@ -242,6 +409,22 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
                     <option key={choice} value={choice}>{choice}</option>
                   ))}
                 </select>
+              ) : draft.type === 'true_false' ? (
+                <div className="flex gap-2">
+                  {(['true', 'false'] as const).map((val) => (
+                    <button
+                      key={val}
+                      onClick={() => updateDraft({ correctAnswer: val })}
+                      className={`flex-1 py-2 px-4 rounded-sm text-sm font-bold uppercase tracking-widest transition-all ${
+                        draft.correctAnswer === val
+                          ? 'bg-arcium-blue text-black'
+                          : 'bg-white/5 text-white/70 hover:bg-white/10'
+                      }`}
+                    >
+                      {val}
+                    </button>
+                  ))}
+                </div>
               ) : (
                 <input
                   type="text"
@@ -251,6 +434,110 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
                   placeholder="Enter correct answer..."
                 />
               )}
+            </div>
+          )}
+
+          {/* Code Fill-in Fields */}
+          {draft.type === 'code_fill_in' && (
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-white/50">Language</label>
+                <select
+                  value={draft.language || 'javascript'}
+                  onChange={(e) => updateDraft({ language: e.target.value })}
+                  className="w-full bg-black border border-white/10 rounded-sm px-3 py-2 text-sm text-white focus:border-arcium-blue focus:outline-none"
+                >
+                  <option value="javascript">JavaScript</option>
+                  <option value="typescript">TypeScript</option>
+                  <option value="python">Python</option>
+                  <option value="rust">Rust</option>
+                  <option value="solidity">Solidity</option>
+                  <option value="sql">SQL</option>
+                </select>
+              </div>
+              
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-white/50">
+                  Code Snippet (use {'{BLANK}'} for blanks)
+                </label>
+                <textarea
+                  value={draft.codeSnippet || ''}
+                  onChange={(e) => updateDraft({ codeSnippet: e.target.value })}
+                  rows={6}
+                  className="w-full bg-black border border-white/10 rounded-sm px-3 py-2 text-sm text-white font-mono focus:border-arcium-blue focus:outline-none"
+                  placeholder={`function example() {\n  const result = {BLANK};\n  return result;\n}`}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-white/50">Number of Blanks</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={5}
+                  value={draft.blankCount || 1}
+                  onChange={(e) => updateDraft({ blankCount: parseInt(e.target.value) || 1 })}
+                  className="w-full bg-black border border-white/10 rounded-sm px-3 py-2 text-sm text-white focus:border-arcium-blue focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-white/50">
+                  Correct Answers (one per blank)
+                </label>
+                {Array.from({ length: draft.blankCount || 1 }).map((_, i) => (
+                  <input
+                    key={i}
+                    type="text"
+                    value={draft.correctAnswers?.[i] || ''}
+                    onChange={(e) => {
+                      const current = draft.correctAnswers || [];
+                      const updated = [...current];
+                      updated[i] = e.target.value;
+                      updateDraft({ correctAnswers: updated });
+                    }}
+                    className="w-full bg-black border border-white/10 rounded-sm px-3 py-2 text-sm text-white focus:border-arcium-blue focus:outline-none"
+                    placeholder={`Answer for blank ${i + 1}`}
+                  />
+                ))}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-white/50">Hints (optional)</label>
+                {(draft.hints || ['']).map((hint, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={hint}
+                      onChange={(e) => {
+                        const current = draft.hints || [];
+                        const updated = [...current];
+                        updated[i] = e.target.value;
+                        updateDraft({ hints: updated });
+                      }}
+                      className="flex-1 bg-black border border-white/10 rounded-sm px-3 py-2 text-sm text-white focus:border-arcium-blue focus:outline-none"
+                      placeholder={`Hint ${i + 1}`}
+                    />
+                    {(draft.hints || []).length > 1 && (
+                      <button
+                        onClick={() => {
+                          const current = draft.hints || [];
+                          updateDraft({ hints: current.filter((_, idx) => idx !== i) });
+                        }}
+                        className="text-red-500/50 hover:text-red-500"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  onClick={() => updateDraft({ hints: [...(draft.hints || []), ''] })}
+                  className="text-xs text-arcium-blue hover:text-white uppercase tracking-widest"
+                >
+                  + Add Hint
+                </button>
+              </div>
             </div>
           )}
 
@@ -455,6 +742,27 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
             <ListOrdered size={14} />
             Multiple Choice
           </button>
+          <button
+            onClick={() => startCreating('checkbox')}
+            className="flex items-center gap-2 bg-white/5 hover:bg-arcium-blue hover:text-black text-white/70 px-4 py-2 rounded-sm transition-all text-xs uppercase tracking-widest font-bold border border-white/10 hover:border-arcium-blue"
+          >
+            <CheckSquare size={14} />
+            Checkbox
+          </button>
+          <button
+            onClick={() => startCreating('true_false')}
+            className="flex items-center gap-2 bg-white/5 hover:bg-arcium-blue hover:text-black text-white/70 px-4 py-2 rounded-sm transition-all text-xs uppercase tracking-widest font-bold border border-white/10 hover:border-arcium-blue"
+          >
+            <ToggleLeft size={14} />
+            True/False
+          </button>
+          <button
+            onClick={() => startCreating('code_fill_in')}
+            className="flex items-center gap-2 bg-white/5 hover:bg-arcium-blue hover:text-black text-white/70 px-4 py-2 rounded-sm transition-all text-xs uppercase tracking-widest font-bold border border-white/10 hover:border-arcium-blue"
+          >
+            <Code size={14} />
+            Code Fill-in
+          </button>
         </div>
       )}
 
@@ -491,6 +799,9 @@ function QuestionTypeIcon({ type }: { type: QuizQuestion['type'] }) {
     case 'short_text': return <AlignLeft size={14} className="text-arcium-blue" />;
     case 'long_text': return <AlignJustify size={14} className="text-arcium-blue" />;
     case 'multiple_choice': return <ListOrdered size={14} className="text-arcium-blue" />;
+    case 'checkbox': return <CheckSquare size={14} className="text-arcium-blue" />;
+    case 'true_false': return <ToggleLeft size={14} className="text-arcium-blue" />;
+    case 'code_fill_in': return <Code size={14} className="text-arcium-blue" />;
     default: return <HelpCircle size={14} className="text-arcium-blue" />;
   }
 }

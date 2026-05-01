@@ -20,6 +20,10 @@ import {
   History,
   RotateCcw,
   TrendingUp,
+  CheckSquare,
+  Square,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 
 interface QuestionResult {
@@ -67,6 +71,12 @@ const QuestionTypeIcon = ({ type }: { type: QuizQuestion["type"] }) => {
       return <AlignJustify size={14} className="text-primary" />;
     case "multiple_choice":
       return <ListOrdered size={14} className="text-primary" />;
+    case "checkbox":
+      return <CheckSquare size={14} className="text-primary" />;
+    case "true_false":
+      return <ToggleLeft size={14} className="text-primary" />;
+    case "code_fill_in":
+      return <AlignLeft size={14} className="text-primary" />;
     default:
       return <HelpCircle size={14} className="text-primary" />;
   }
@@ -397,7 +407,7 @@ export default function LessonQuizForm({
           </label>
           
           {/* Hint (shown before submission if available) */}
-          {!hasSubmitted && question.hint && (
+          {!hasSubmitted && 'hint' in question && question.hint && (
             <div className="mb-3 flex items-start gap-2 rounded-lg bg-primary/5 border border-primary/20 px-3 py-2">
               <Lightbulb size={14} className="mt-0.5 text-primary/60 shrink-0" />
               <span className="text-xs text-primary/80">{question.hint}</span>
@@ -544,6 +554,178 @@ export default function LessonQuizForm({
               })}
               {showFeedback && result?.explanation && (
                 <p className="text-xs text-primary/80 italic mt-2">{result.explanation}</p>
+              )}
+            </div>
+          ) : null}
+          {/* Checkbox (Multi-select) */}
+          {question.type === "checkbox" ? (
+            <div className="space-y-2">
+              <p className="text-xs text-on-surface-variant/60 mb-2">Select all that apply</p>
+              {question.choices.map((choice) => {
+                const selectedArray = draftAnswers[question.id] ? JSON.parse(draftAnswers[question.id]) : [];
+                const isSelected = selectedArray.includes(choice);
+                const isCorrectChoice = question.correctAnswers?.includes(choice);
+                const showCorrect = showFeedback && isCorrectChoice;
+                const showIncorrect = showFeedback && isSelected && !isCorrectChoice;
+                const showMissed = showFeedback && !isSelected && isCorrectChoice;
+                
+                return (
+                  <label
+                    key={choice}
+                    className={`group flex items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-all cursor-pointer ${
+                      hasSubmitted
+                        ? showCorrect
+                          ? "border-primary/40 bg-primary/10 text-primary"
+                          : showIncorrect
+                            ? "border-error/40 bg-error/10 text-error"
+                            : showMissed
+                              ? "border-primary/30 bg-primary/5 text-primary/70"
+                              : "border-outline-variant/20 text-on-surface-variant opacity-60"
+                        : "border-outline-variant/20 text-on-surface-variant hover:border-primary/40 hover:bg-primary/5 hover:text-white"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      name={`${question.id}[]`}
+                      value={choice}
+                      checked={isSelected}
+                      onChange={(e) => {
+                        const current = draftAnswers[question.id] ? JSON.parse(draftAnswers[question.id]) : [];
+                        const updated = e.target.checked 
+                          ? [...current, choice]
+                          : current.filter((c: string) => c !== choice);
+                        handleInputChange(question.id, JSON.stringify(updated), 0);
+                      }}
+                      disabled={hasSubmitted}
+                      className="peer sr-only"
+                    />
+                    {!hasSubmitted && (
+                      <>
+                        <Square
+                          size={16}
+                          className="text-on-surface-variant/40 transition-all peer-checked:hidden group-hover:text-primary/60"
+                        />
+                        <CheckSquare
+                          size={16}
+                          className="hidden text-primary transition-all peer-checked:block"
+                        />
+                      </>
+                    )}
+                    {hasSubmitted && (
+                      <>
+                        {showCorrect && <CheckSquare size={16} className="text-primary" />}
+                        {showIncorrect && <XCircle size={16} className="text-error" />}
+                        {showMissed && <CheckSquare size={16} className="text-primary/50" />}
+                        {!isSelected && !isCorrectChoice && <Square size={16} className="text-on-surface-variant/40" />}
+                      </>
+                    )}
+                    <span className="flex-1">{choice}</span>
+                    {showMissed && <span className="text-[10px] text-primary/50">(Missed)</span>}
+                  </label>
+                );
+              })}
+              {showFeedback && result?.explanation && (
+                <p className="text-xs text-primary/80 italic mt-2">{result.explanation}</p>
+              )}
+            </div>
+          ) : null}
+          {/* True/False */}
+          {question.type === "true_false" ? (
+            <div className="space-y-3">
+              <div className="flex gap-3">
+                {([true, false] as const).map((value) => {
+                  const isSelected = draftAnswers[question.id] === String(value);
+                  const isCorrectValue = question.correctAnswer === value;
+                  const showCorrect = showFeedback && isCorrectValue;
+                  const showIncorrect = showFeedback && isSelected && !result?.correct;
+                  
+                  return (
+                    <label
+                      key={String(value)}
+                      className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-6 py-4 text-sm font-medium transition-all cursor-pointer ${
+                        hasSubmitted
+                          ? showCorrect
+                            ? "border-primary/40 bg-primary/10 text-primary"
+                            : showIncorrect
+                              ? "border-error/40 bg-error/10 text-error"
+                              : "border-outline-variant/20 text-on-surface-variant opacity-60"
+                          : isSelected
+                            ? "border-primary/40 bg-primary/10 text-primary"
+                            : "border-outline-variant/20 text-on-surface-variant hover:border-primary/40 hover:bg-primary/5 hover:text-white"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name={question.id}
+                        value={String(value)}
+                        required={question.required}
+                        checked={isSelected}
+                        onChange={(e) => handleInputChange(question.id, e.target.value, 0)}
+                        disabled={hasSubmitted}
+                        className="peer sr-only"
+                      />
+                      {hasSubmitted && showCorrect && <CheckCircle2 size={16} className="text-primary" />}
+                      {hasSubmitted && showIncorrect && <XCircle size={16} className="text-error" />}
+                      {value ? "TRUE" : "FALSE"}
+                      {!hasSubmitted && isSelected && <ToggleRight size={16} className="text-primary" />}
+                      {!hasSubmitted && !isSelected && <ToggleLeft size={16} className="text-on-surface-variant/40" />}
+                    </label>
+                  );
+                })}
+              </div>
+              {showFeedback && result?.explanation && (
+                <p className="text-xs text-primary/80 italic">{result.explanation}</p>
+              )}
+            </div>
+          ) : null}
+          {/* Code Fill-in - Simple version with text inputs */}
+          {question.type === "code_fill_in" ? (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-black/60 border border-outline-variant/20 p-4 font-mono text-sm overflow-x-auto">
+                <pre className="text-on-surface-variant whitespace-pre-wrap">
+                  {question.codeSnippet.split(/\{BLANK\}/).map((part, i, arr) => (
+                    <span key={i}>
+                      {part}
+                      {i < arr.length - 1 && (
+                        <input
+                          type="text"
+                          name={`${question.id}_blank_${i}`}
+                          placeholder={`___${i + 1}___`}
+                          defaultValue={draftAnswers[`${question.id}_blank_${i}`] || ""}
+                          onChange={(e) => handleInputChange(`${question.id}_blank_${i}`, e.target.value, 100)}
+                          disabled={hasSubmitted}
+                          className={`inline-block w-24 mx-1 px-2 py-1 text-center text-sm rounded border ${
+                            hasSubmitted
+                              ? result?.correct
+                                ? "border-primary/40 bg-primary/10 text-primary"
+                                : "border-error/40 bg-error/10 text-error"
+                              : "border-outline-variant/40 bg-black/40 text-white focus:border-primary"
+                          }`}
+                        />
+                      )}
+                    </span>
+                  ))}
+                </pre>
+              </div>
+              {question.hints?.map((hint, i) => (
+                !hasSubmitted && (
+                  <div key={i} className="flex items-start gap-2 rounded-lg bg-primary/5 border border-primary/20 px-3 py-2">
+                    <Lightbulb size={14} className="mt-0.5 text-primary/60 shrink-0" />
+                    <span className="text-xs text-primary/80">Hint {i + 1}: {hint}</span>
+                  </div>
+                )
+              ))}
+              {showFeedback && (
+                <div className="space-y-1">
+                  {!result?.correct && question.correctAnswers && (
+                    <p className="text-xs text-error">
+                      Correct answers: {question.correctAnswers.join(", ")}
+                    </p>
+                  )}
+                  {result?.explanation && (
+                    <p className="text-xs text-primary/80 italic">{result.explanation}</p>
+                  )}
+                </div>
               )}
             </div>
           ) : null}

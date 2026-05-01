@@ -66,6 +66,41 @@ export type QuizQuestion =
       explanation?: string;
       correctAnswer?: string;
       points?: number;
+    }
+  | {
+      id: string;
+      type: "checkbox";
+      prompt: string;
+      required: boolean;
+      choices: string[];
+      hint?: string;
+      explanation?: string;
+      correctAnswers?: string[];
+      points?: number;
+      pointsPerCorrect?: number;
+    }
+  | {
+      id: string;
+      type: "true_false";
+      prompt: string;
+      required: boolean;
+      hint?: string;
+      explanation?: string;
+      correctAnswer?: boolean;
+      points?: number;
+    }
+  | {
+      id: string;
+      type: "code_fill_in";
+      prompt: string;
+      required: boolean;
+      codeSnippet: string;
+      language: string;
+      blankCount: number;
+      hints?: string[];
+      correctAnswers?: string[];
+      explanation?: string;
+      points?: number;
     };
 
 export interface KnowledgeCategoryRecord {
