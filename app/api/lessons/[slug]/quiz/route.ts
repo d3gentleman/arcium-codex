@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getModuleLessonBySlug } from "@/lib/content";
 import { recordLessonQuizSubmission } from "@/lib/lesson-store";
-import { validateQuizAnswers } from "@/lib/validation";
+import { scoreQuizAnswers, validateQuizAnswers } from "@/lib/validation";
 
 export async function POST(
   request: Request,
@@ -28,11 +28,31 @@ export async function POST(
     return NextResponse.json({ error: validation.error }, { status: 400 });
   }
 
-  await recordLessonQuizSubmission({
+  // Calculate score
+  const score = scoreQuizAnswers(lesson, validation.data);
+
+  const submission = await recordLessonQuizSubmission({
     userId: session.user.id,
     lessonSlug: slug,
     answers: validation.data,
+    score: {
+      totalPoints: score.totalPoints,
+      earnedPoints: score.earnedPoints,
+      percentage: score.percentage,
+      passed: score.passed,
+    },
   });
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    score: {
+      totalPoints: score.totalPoints,
+      earnedPoints: score.earnedPoints,
+      percentage: score.percentage,
+      passed: score.passed,
+    },
+    results: score.questionResults,
+    submissionId: submission.id,
+    submittedAt: submission.submitted_at,
+  });
 }

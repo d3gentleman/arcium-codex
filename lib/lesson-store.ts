@@ -33,41 +33,52 @@ export async function isLessonCompleted(userId: string, lessonSlug: string): Pro
   return (result.rowCount ?? 0) > 0;
 }
 
-export async function recordLessonQuizSubmission(input: {
+export interface QuizSubmissionInput {
   userId: string;
   lessonSlug: string;
   answers: Record<string, string>;
-}) {
+  score?: {
+    totalPoints: number;
+    earnedPoints: number;
+    percentage: number;
+    passed: boolean;
+  };
+}
+
+export async function recordLessonQuizSubmission(input: QuizSubmissionInput) {
   return withTransaction(async (client) => {
     const submission = await insertSubmission(client, input);
 
     await client.query(
-      `insert into lesson_progress (user_id, lesson_slug, completed_at, latest_submission_id)
-       values ($1, $2, now(), $3)
+      `insert into lesson_progress (user_id, lesson_slug, completed_at, latest_submission_id, best_score_percent)
+       values ($1, $2, now(), $3, $4)
        on conflict (user_id, lesson_slug)
        do update set
          completed_at = excluded.completed_at,
-         latest_submission_id = excluded.latest_submission_id`,
-      [input.userId, input.lessonSlug, submission.id],
+         latest_submission_id = excluded.latest_submission_id,
+         best_score_percent = greatest(lesson_progress.best_score_percent, excluded.best_score_percent)`,
+      [input.userId, input.lessonSlug, submission.id, input.score?.percentage ?? null],
     );
 
-    return submission.id;
+    return submission;
   });
 }
 
 async function insertSubmission(
   client: PoolClient,
-  input: {
-    userId: string;
-    lessonSlug: string;
-    answers: Record<string, string>;
-  },
+  input: QuizSubmissionInput,
 ) {
-  const result = await client.query<{ id: number }>(
-    `insert into lesson_quiz_submission (user_id, lesson_slug, answers)
-     values ($1, $2, $3::jsonb)
-     returning id`,
-    [input.userId, input.lessonSlug, JSON.stringify(input.answers)],
+  const result = await client.query<{ id: number; submitted_at: string }>(
+    `insert into lesson_quiz_submission (user_id, lesson_slug, answers, score_percent, passed)
+     values ($1, $2, $3::jsonb, $4, $5)
+     returning id, submitted_at`,
+    [
+      input.userId,
+      input.lessonSlug,
+      JSON.stringify(input.answers),
+      input.score?.percentage ?? null,
+      input.score?.passed ?? null,
+    ],
   );
 
   return result.rows[0];

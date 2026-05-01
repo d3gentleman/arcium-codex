@@ -15,7 +15,26 @@ import {
   CheckCircle2,
   Circle,
   Lock,
+  XCircle,
+  Lightbulb,
 } from "lucide-react";
+
+interface QuestionResult {
+  questionId: string;
+  correct: boolean;
+  points: number;
+  earned: number;
+  userAnswer: string;
+  correctAnswer?: string;
+  explanation?: string;
+}
+
+interface QuizScore {
+  totalPoints: number;
+  earnedPoints: number;
+  percentage: number;
+  passed: boolean;
+}
 
 interface LessonQuizFormProps {
   lessonSlug: string;
@@ -49,6 +68,9 @@ export default function LessonQuizForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [draftAnswers, setDraftAnswers] = useState<Record<string, string>>({});
   const [charCounts, setCharCounts] = useState<Record<string, number>>({});
+  const [score, setScore] = useState<QuizScore | null>(null);
+  const [results, setResults] = useState<QuestionResult[] | null>(null);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   // Load draft answers from localStorage on mount
   useEffect(() => {
@@ -94,7 +116,13 @@ export default function LessonQuizForm({
         body: JSON.stringify({ answers }),
       });
 
-      const payload = (await response.json()) as { error?: string };
+      const payload = (await response.json()) as { 
+        error?: string;
+        score?: QuizScore;
+        results?: QuestionResult[];
+        submissionId?: number;
+        submittedAt?: string;
+      };
 
       if (!response.ok) {
         setError(payload.error || "Unable to submit your quiz.");
@@ -103,7 +131,19 @@ export default function LessonQuizForm({
 
       // Clear draft on successful submission
       localStorage.removeItem(`quiz-draft-${lessonSlug}`);
-      setSuccess("Quiz submitted. This lesson is now marked complete.");
+      
+      // Store score and results for feedback display
+      if (payload.score) {
+        setScore(payload.score);
+      }
+      if (payload.results) {
+        setResults(payload.results);
+      }
+      setHasSubmitted(true);
+      
+      setSuccess(payload.score?.passed 
+        ? `Quiz passed! Score: ${payload.score?.earnedPoints ?? 0}/${payload.score?.totalPoints ?? 0} (${payload.score?.percentage ?? 0}%)`
+        : `Quiz completed. Score: ${payload.score?.earnedPoints ?? 0}/${payload.score?.totalPoints ?? 0} (${payload.score?.percentage ?? 0}%) - Review recommended`);
       router.refresh();
     } catch {
       setError("Unable to submit your quiz right now.");
@@ -141,6 +181,11 @@ export default function LessonQuizForm({
   const answeredCount = questions.filter((q) => draftAnswers[q.id]?.trim()).length;
   const progressPercent = questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
 
+  // Find result for a specific question
+  const getQuestionResult = (questionId: string): QuestionResult | undefined => {
+    return results?.find((r) => r.questionId === questionId);
+  };
+
   return (
     <form
       className="space-y-6"
@@ -150,43 +195,108 @@ export default function LessonQuizForm({
         });
       }}
     >
-      {/* Progress Header */}
-      <div className="rounded-[1rem] border border-outline-variant/20 bg-surface-container-low p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-on-surface-variant/60">
-            Progress
-          </span>
-          <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
-            {answeredCount} of {questions.length} answered
-          </span>
+      {/* Score Display (shown after submission) */}
+      {score && (
+        <div className={`rounded-[1.2rem] border p-6 ${score.passed ? "border-primary/30 bg-primary/10" : "border-error/30 bg-error/10"}`}>
+          <div className="flex items-center gap-4">
+            <div className={`rounded-full p-3 ${score.passed ? "bg-primary/20" : "bg-error/20"}`}>
+              {score.passed ? (
+                <Trophy size={28} className="text-primary" />
+              ) : (
+                <AlertCircle size={28} className="text-error" />
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <span className={`text-lg font-bold ${score.passed ? "text-primary" : "text-error"}`}>
+                  {score.passed ? "Quiz Passed!" : "Review Recommended"}
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/60">
+                  {score.percentage}%
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-700 ${score.passed ? "bg-primary" : "bg-error"}`}
+                    style={{ width: `${score.percentage}%` }}
+                  />
+                </div>
+                <span className="text-sm font-mono text-on-surface-variant">
+                  {score.earnedPoints}/{score.totalPoints}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-          <div
-            className="h-full bg-primary transition-all duration-500 ease-out"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      </div>
+      )}
 
-      {questions.map((question, index) => (
+      {/* Progress Header (hidden after submission) */}
+      {!hasSubmitted && (
+        <div className="rounded-[1rem] border border-outline-variant/20 bg-surface-container-low p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-on-surface-variant/60">
+              Progress
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
+              {answeredCount} of {questions.length} answered
+            </span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full bg-primary transition-all duration-500 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {questions.map((question, index) => {
+        const result = getQuestionResult(question.id);
+        const showFeedback = hasSubmitted && result;
+        
+        return (
         <div
           key={question.id}
-          className="rounded-[1.2rem] border border-outline-variant/20 bg-surface-container-low p-5 transition-all focus-within:border-primary/40 focus-within:shadow-[0_0_20px_rgba(105,218,255,0.05)]"
+          className={`rounded-[1.2rem] border p-5 transition-all ${
+            showFeedback
+              ? result?.correct
+                ? "border-primary/30 bg-primary/5"
+                : "border-error/30 bg-error/5"
+              : "border-outline-variant/20 bg-surface-container-low focus-within:border-primary/40 focus-within:shadow-[0_0_20px_rgba(105,218,255,0.05)]"
+          }`}
         >
           <div className="mb-3 flex items-center gap-2">
             <QuestionTypeIcon type={question.type} />
             <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">
               Question {index + 1} of {questions.length}
             </span>
-            {question.required && (
+            {question.required && !showFeedback && (
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-error/80">
                 Required
+              </span>
+            )}
+            {showFeedback && (
+              <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.2em] ${result?.correct ? "text-primary" : "text-error"}`}>
+                {result?.correct ? (
+                  <><CheckCircle2 size={12} /> Correct</>
+                ) : (
+                  <><XCircle size={12} /> Incorrect</>
+                )}
               </span>
             )}
           </div>
           <label className="mb-3 block text-sm font-semibold leading-7 text-white">
             {question.prompt}
           </label>
+          
+          {/* Hint (shown before submission if available) */}
+          {!hasSubmitted && question.hint && (
+            <div className="mb-3 flex items-start gap-2 rounded-lg bg-primary/5 border border-primary/20 px-3 py-2">
+              <Lightbulb size={14} className="mt-0.5 text-primary/60 shrink-0" />
+              <span className="text-xs text-primary/80">{question.hint}</span>
+            </div>
+          )}
           {question.type === "short_text" ? (
             <div className="space-y-2">
               <input
@@ -195,17 +305,38 @@ export default function LessonQuizForm({
                 required={question.required}
                 defaultValue={draftAnswers[question.id] || ""}
                 onChange={(e) => handleInputChange(question.id, e.target.value, 500)}
-                className="w-full rounded-lg border border-outline-variant/30 bg-black/40 px-4 py-3 text-sm text-white outline-none transition-all focus:border-primary focus:shadow-[0_0_12px_rgba(105,218,255,0.15)]"
+                disabled={hasSubmitted}
+                className={`w-full rounded-lg border px-4 py-3 text-sm text-white outline-none transition-all ${
+                  hasSubmitted
+                    ? result?.correct
+                      ? "border-primary/30 bg-primary/10"
+                      : "border-error/30 bg-error/10"
+                    : "border-outline-variant/30 bg-black/40 focus:border-primary focus:shadow-[0_0_12px_rgba(105,218,255,0.15)]"
+                }`}
               />
-              <div className="flex justify-end">
-                <span
-                  className={`text-[10px] font-mono transition-colors ${
-                    (charCounts[question.id] || 0) > 450 ? "text-error/80" : "text-on-surface-variant/50"
-                  }`}
-                >
-                  {charCounts[question.id] || 0}/500
-                </span>
-              </div>
+              {showFeedback && (
+                <div className="space-y-1">
+                  {!result?.correct && result?.correctAnswer && (
+                    <p className="text-xs text-error">
+                      Correct answer: <span className="font-semibold">{result.correctAnswer}</span>
+                    </p>
+                  )}
+                  {result?.explanation && (
+                    <p className="text-xs text-primary/80 italic">{result.explanation}</p>
+                  )}
+                </div>
+              )}
+              {!hasSubmitted && (
+                <div className="flex justify-end">
+                  <span
+                    className={`text-[10px] font-mono transition-colors ${
+                      (charCounts[question.id] || 0) > 450 ? "text-error/80" : "text-on-surface-variant/50"
+                    }`}
+                  >
+                    {charCounts[question.id] || 0}/500
+                  </span>
+                </div>
+              )}
             </div>
           ) : null}
           {question.type === "long_text" ? (
@@ -217,50 +348,102 @@ export default function LessonQuizForm({
                 rows={5}
                 defaultValue={draftAnswers[question.id] || ""}
                 onChange={(e) => handleInputChange(question.id, e.target.value, 5000)}
-                className="w-full rounded-lg border border-outline-variant/30 bg-black/40 px-4 py-3 text-sm text-white outline-none transition-all focus:border-primary focus:shadow-[0_0_12px_rgba(105,218,255,0.15)] resize-y"
+                disabled={hasSubmitted}
+                className={`w-full rounded-lg border px-4 py-3 text-sm text-white outline-none transition-all resize-y ${
+                  hasSubmitted
+                    ? result?.correct
+                      ? "border-primary/30 bg-primary/10"
+                      : "border-error/30 bg-error/10"
+                    : "border-outline-variant/30 bg-black/40 focus:border-primary focus:shadow-[0_0_12px_rgba(105,218,255,0.15)]"
+                }`}
               />
-              <div className="flex justify-end">
-                <span
-                  className={`text-[10px] font-mono transition-colors ${
-                    (charCounts[question.id] || 0) > 4500 ? "text-error/80" : "text-on-surface-variant/50"
-                  }`}
-                >
-                  {charCounts[question.id] || 0}/5000
-                </span>
-              </div>
+              {showFeedback && (
+                <div className="space-y-1">
+                  {!result?.correct && result?.correctAnswer && (
+                    <p className="text-xs text-error">
+                      Sample answer: <span className="font-semibold">{result.correctAnswer}</span>
+                    </p>
+                  )}
+                  {result?.explanation && (
+                    <p className="text-xs text-primary/80 italic">{result.explanation}</p>
+                  )}
+                </div>
+              )}
+              {!hasSubmitted && (
+                <div className="flex justify-end">
+                  <span
+                    className={`text-[10px] font-mono transition-colors ${
+                      (charCounts[question.id] || 0) > 4500 ? "text-error/80" : "text-on-surface-variant/50"
+                    }`}
+                  >
+                    {charCounts[question.id] || 0}/5000
+                  </span>
+                </div>
+              )}
             </div>
           ) : null}
           {question.type === "multiple_choice" ? (
             <div className="space-y-2">
-              {question.choices.map((choice) => (
-                <label
-                  key={choice}
-                  className="group flex items-center gap-3 rounded-lg border border-outline-variant/20 px-4 py-3 text-sm text-on-surface-variant transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-white cursor-pointer"
-                >
-                  <input
-                    type="radio"
-                    name={question.id}
-                    value={choice}
-                    required={question.required}
-                    defaultChecked={draftAnswers[question.id] === choice}
-                    onChange={(e) => handleInputChange(question.id, e.target.value, 0)}
-                    className="peer sr-only"
-                  />
-                  <Circle
-                    size={16}
-                    className="text-on-surface-variant/40 transition-all peer-checked:hidden group-hover:text-primary/60"
-                  />
-                  <CheckCircle2
-                    size={16}
-                    className="hidden text-primary transition-all peer-checked:block"
-                  />
-                  <span className="flex-1">{choice}</span>
-                </label>
-              ))}
+              {question.choices.map((choice) => {
+                const isSelected = draftAnswers[question.id] === choice;
+                const isCorrectChoice = result?.correctAnswer === choice;
+                const showCorrect = showFeedback && isCorrectChoice;
+                const showIncorrect = showFeedback && isSelected && !result?.correct;
+                
+                return (
+                  <label
+                    key={choice}
+                    className={`group flex items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-all cursor-pointer ${
+                      hasSubmitted
+                        ? showCorrect
+                          ? "border-primary/40 bg-primary/10 text-primary"
+                          : showIncorrect
+                            ? "border-error/40 bg-error/10 text-error"
+                            : "border-outline-variant/20 text-on-surface-variant opacity-60"
+                        : "border-outline-variant/20 text-on-surface-variant hover:border-primary/40 hover:bg-primary/5 hover:text-white"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name={question.id}
+                      value={choice}
+                      required={question.required}
+                      defaultChecked={isSelected}
+                      onChange={(e) => handleInputChange(question.id, e.target.value, 0)}
+                      disabled={hasSubmitted}
+                      className="peer sr-only"
+                    />
+                    {!hasSubmitted && (
+                      <>
+                        <Circle
+                          size={16}
+                          className="text-on-surface-variant/40 transition-all peer-checked:hidden group-hover:text-primary/60"
+                        />
+                        <CheckCircle2
+                          size={16}
+                          className="hidden text-primary transition-all peer-checked:block"
+                        />
+                      </>
+                    )}
+                    {hasSubmitted && (
+                      <>
+                        {showCorrect && <CheckCircle2 size={16} className="text-primary" />}
+                        {showIncorrect && <XCircle size={16} className="text-error" />}
+                        {!isSelected && !isCorrectChoice && <Circle size={16} className="text-on-surface-variant/40" />}
+                      </>
+                    )}
+                    <span className="flex-1">{choice}</span>
+                  </label>
+                );
+              })}
+              {showFeedback && result?.explanation && (
+                <p className="text-xs text-primary/80 italic mt-2">{result.explanation}</p>
+              )}
             </div>
           ) : null}
         </div>
-      ))}
+      );
+      })}
 
       {error ? (
         <div className="flex items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-4 py-3">
@@ -268,7 +451,7 @@ export default function LessonQuizForm({
           <p className="text-sm text-error">{error}</p>
         </div>
       ) : null}
-      {success ? (
+      {success && !score && (
         <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/10 px-4 py-4">
           <div className="rounded-full bg-primary/20 p-2">
             <Trophy size={20} className="text-primary" />
@@ -278,30 +461,41 @@ export default function LessonQuizForm({
             <p className="text-sm text-on-surface-variant">{success}</p>
           </div>
         </div>
-      ) : null}
+      )}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="inline-flex items-center gap-2 border border-primary/30 bg-primary/10 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-primary transition-all hover:bg-primary/20 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(105,218,255,0.15)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 size={16} className="animate-spin" />
-            Submitting...
-          </>
-        ) : isCompleted ? (
-          <>
-            <CheckCircle2 size={16} />
-            Submit Updated Quiz
-          </>
-        ) : (
-          <>
-            <CheckCircle2 size={16} />
-            Submit Quiz
-          </>
-        )}
-      </button>
+      {!hasSubmitted && (
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="inline-flex items-center gap-2 border border-primary/30 bg-primary/10 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-primary transition-all hover:bg-primary/20 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(105,218,255,0.15)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 size={16} className="animate-spin" />
+              Submitting...
+            </>
+          ) : isCompleted ? (
+            <>
+              <CheckCircle2 size={16} />
+              Submit Updated Quiz
+            </>
+          ) : (
+            <>
+              <CheckCircle2 size={16} />
+              Submit Quiz
+            </>
+          )}
+        </button>
+      )}
+      
+      {hasSubmitted && (
+        <div className="flex items-center gap-3 rounded-lg border border-outline-variant/25 bg-surface-container-low px-4 py-3">
+          <CheckCircle2 size={16} className="text-primary" />
+          <span className="text-sm text-on-surface-variant">
+            Quiz submitted. Review your answers above.
+          </span>
+        </div>
+      )}
     </form>
   );
 }

@@ -40,12 +40,21 @@ export type QuizQuestion =
       type: "short_text";
       prompt: string;
       required: boolean;
+      hint?: string;
+      explanation?: string;
+      correctAnswer?: string;
+      points?: number;
     }
   | {
       id: string;
       type: "long_text";
       prompt: string;
       required: boolean;
+      hint?: string;
+      explanation?: string;
+      correctAnswer?: string;
+      points?: number;
+      requiresManualGrading?: boolean;
     }
   | {
       id: string;
@@ -53,6 +62,10 @@ export type QuizQuestion =
       prompt: string;
       required: boolean;
       choices: string[];
+      hint?: string;
+      explanation?: string;
+      correctAnswer?: string;
+      points?: number;
     };
 
 export interface KnowledgeCategoryRecord {
