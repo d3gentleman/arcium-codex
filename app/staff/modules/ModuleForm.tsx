@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { saveModuleLesson, deleteModuleLesson } from "./actions";
-import { Trash2, Plus, X } from "lucide-react";
-import { BodySection } from "@/types/domain";
+import { Trash2, Plus, ArrowLeft, Save } from "lucide-react";
+import { BodySection, QuizQuestion } from "@/types/domain";
+import Link from "next/link";
+import QuizBuilder from "@/components/staff/QuizBuilder";
 
 type ModuleData = {
   slug?: string;
@@ -23,7 +25,7 @@ type Category = {
   title: string;
 };
 
-const MODULE_CATEGORIES = [
+const DEFAULT_CATEGORIES: Category[] = [
   { id: "fundamentals", title: "Fundamentals" },
   { id: "architecture", title: "Architecture" },
   { id: "execution", title: "Execution" },
@@ -34,22 +36,29 @@ const MODULE_CATEGORIES = [
 export default function ModuleForm({
   initialData,
   isEdit = false,
+  categories,
 }: {
   initialData?: ModuleData;
-  categories?: Category[];
   isEdit?: boolean;
+  categories?: Category[];
 }) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const categoriesList = categories && categories.length > 0 ? categories : DEFAULT_CATEGORIES;
   
-  // Body Sections State
+  // Initialize with at least one section if creating new
   const [sections, setSections] = useState<BodySection[]>(
-    initialData?.bodySections || []
+    initialData?.bodySections && initialData.bodySections.length > 0
+      ? initialData.bodySections 
+      : [{ title: "", body: "", visual: { type: "image", src: "" } }]
   );
 
-  // Quiz questions state
-  const [quizQuestionsStr, setQuizQuestionsStr] = useState(
-    JSON.stringify(initialData?.quizQuestions || [], null, 2)
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>(
+    initialData?.quizQuestions || []
   );
+  
+  // Autosave state
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
 
   const addSection = () => {
     setSections([...sections, { title: "", body: "", visual: { type: "image", src: "" } }]);
@@ -67,244 +76,334 @@ export default function ModuleForm({
       (newSections[index] as any)[field] = value;
     }
     setSections(newSections);
+    setIsDirty(true);
+  };
+
+  const handleQuizChange = useCallback((newQuestions: QuizQuestion[]) => {
+    setQuizQuestions(newQuestions);
+    setIsDirty(true);
+  }, []);
+
+  // Load draft on mount
+  useEffect(() => {
+    const draftKey = `module-draft-${initialData?.slug || 'new'}`;
+    const saved = localStorage.getItem(draftKey);
+    if (saved && !isEdit) {
+      try {
+        const draft = JSON.parse(saved);
+        // Could show a "restore draft?" modal here
+        // For now, just log that draft exists
+        console.log('Draft found:', draft);
+      } catch {
+        // Invalid draft, ignore
+      }
+    }
+  }, [initialData?.slug, isEdit]);
+
+  // Autosave effect
+  useEffect(() => {
+    if (!isDirty) return;
+    
+    const timer = setTimeout(() => {
+      const draft = {
+        title: (document.querySelector('input[name="title"]') as HTMLInputElement)?.value,
+        slug: (document.querySelector('input[name="slug"]') as HTMLInputElement)?.value,
+        categoryId: (document.querySelector('select[name="categoryId"]') as HTMLSelectElement)?.value,
+        summary: (document.querySelector('textarea[name="summary"]') as HTMLTextAreaElement)?.value,
+        introductionHeading: (document.querySelector('input[name="introductionHeading"]') as HTMLInputElement)?.value,
+        introduction: (document.querySelector('textarea[name="introduction"]') as HTMLTextAreaElement)?.value,
+        visualizationId: (document.querySelector('input[name="visualizationId"]') as HTMLInputElement)?.value,
+        bodySections: sections,
+        quizQuestions,
+      };
+      localStorage.setItem(`module-draft-${initialData?.slug || 'new'}`, JSON.stringify(draft));
+      setLastSaved(new Date());
+      setIsDirty(false);
+    }, 30000); // 30 seconds
+
+    return () => clearTimeout(timer);
+  }, [isDirty, sections, quizQuestions, initialData?.slug]);
+
+  const handleSubmit = () => {
+    // Clear draft on submit (assume success; restore on error page if needed)
+    localStorage.removeItem(`module-draft-${initialData?.slug || 'new'}`);
   };
 
   return (
-    <div className="max-w-4xl pb-20">
-      <form action={saveModuleLesson} className="space-y-12">
+    <div className="max-w-4xl pb-20 mx-auto">
+      <form action={saveModuleLesson} onSubmit={handleSubmit} className="space-y-10">
         <input type="hidden" name="isEdit" value={isEdit ? "true" : "false"} />
         <input type="hidden" name="originalSlug" value={initialData?.slug || ""} />
         <input type="hidden" name="bodySections" value={JSON.stringify(sections)} />
+        <input type="hidden" name="quizQuestions" value={JSON.stringify(quizQuestions)} />
 
-        {/* 1. Category */}
-        <div className="bg-white/5 border border-white/10 rounded-sm p-8 space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-widest text-arcium-blue">Category</label>
-            <select
-              name="categoryId"
-              defaultValue={initialData?.categoryId || "fundamentals"}
-              required
-              className="w-full bg-[#111] border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white"
-            >
-              {MODULE_CATEGORIES.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.title}
-                </option>
-              ))}
-            </select>
+        {/* --- CORE METADATA --- */}
+        <div className="bg-[#0A0A0A] border border-white/10 rounded-sm p-8 space-y-8 shadow-2xl">
+          <h2 className="text-xl font-bold uppercase tracking-widest text-white/40 border-b border-white/5 pb-4">Basic Information</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Category Dropdown */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-arcium-blue">Category</label>
+              <select
+                name="categoryId"
+                defaultValue={initialData?.categoryId || "fundamentals"}
+                required
+                className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white appearance-none cursor-pointer hover:border-white/20 transition-colors"
+              >
+                {categoriesList.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Lesson Title */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-arcium-blue">Lesson Title</label>
+              <input
+                type="text"
+                name="title"
+                defaultValue={initialData?.title}
+                required
+                placeholder="e.g. Redefining Privacy"
+                className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white"
+              />
+            </div>
           </div>
 
-          {/* 2. Lesson Title */}
-          <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-widest text-arcium-blue">Lesson Title</label>
-            <input
-              type="text"
-              name="title"
-              defaultValue={initialData?.title}
-              required
-              placeholder="Enter lesson title..."
-              className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Slug */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-arcium-blue">Slug</label>
+              <input
+                type="text"
+                name="slug"
+                defaultValue={initialData?.slug}
+                required
+                placeholder="privacy-paradigm"
+                className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white font-mono text-sm"
+              />
+            </div>
+
+            {/* Tag (Optional in user request, but needed in DB) */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-white/30">Tag (Internal)</label>
+              <input
+                type="text"
+                name="tag"
+                defaultValue={initialData?.tag || "Module"}
+                placeholder="Module"
+                className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-white/30 text-white/50"
+              />
+            </div>
           </div>
 
-          {/* 3. Slug */}
+          {/* Summary */}
           <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-widest text-arcium-blue">Slug</label>
-            <input
-              type="text"
-              name="slug"
-              defaultValue={initialData?.slug}
-              required
-              placeholder="lesson-slug-here"
-              className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white font-mono text-sm"
-            />
-          </div>
-
-          {/* 4. Summary */}
-          <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-widest text-arcium-blue">Summary</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-arcium-blue">Summary</label>
             <textarea
               name="summary"
               defaultValue={initialData?.summary}
               required
               rows={3}
-              placeholder="Short description for the module list..."
-              className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white resize-y"
+              placeholder="Provide a concise summary for the module list..."
+              className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white resize-none"
             />
           </div>
         </div>
 
-        {/* 5. Introduction Heading & 6. Introduction Body */}
-        <div className="bg-white/5 border border-white/10 rounded-sm p-8 space-y-6">
+        {/* --- INTRODUCTION --- */}
+        <div className="bg-[#0A0A0A] border border-white/10 rounded-sm p-8 space-y-8 shadow-2xl">
+          <h2 className="text-xl font-bold uppercase tracking-widest text-white/40 border-b border-white/5 pb-4">Introduction Section</h2>
+          
           <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-widest text-arcium-blue">Introduction Heading</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-arcium-blue">Introduction Heading</label>
             <input
               type="text"
               name="introductionHeading"
               defaultValue={initialData?.introductionHeading}
-              placeholder="Heading for the introduction section..."
-              className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white"
+              placeholder="e.g. Setting the Stage"
+              className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-widest text-arcium-blue">Introduction Body</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-arcium-blue">Introduction Body</label>
             <textarea
               name="introduction"
               defaultValue={initialData?.introduction}
-              rows={5}
-              placeholder="Main introduction content..."
-              className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white resize-y"
+              rows={6}
+              placeholder="The main introduction text for this module..."
+              className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white"
             />
           </div>
         </div>
 
-        {/* Sections Management */}
-        <div className="space-y-8">
-          <h2 className="text-2xl font-bold border-b border-white/10 pb-4">Content Sections</h2>
+        {/* --- DYNAMIC SECTIONS --- */}
+        <div className="space-y-10">
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <h2 className="text-xl font-bold uppercase tracking-widest text-white/40">Content Sections</h2>
+            <span className="text-xs font-mono text-white/20">{sections.length} Section{sections.length !== 1 ? 's' : ''}</span>
+          </div>
           
           <div className="space-y-12">
             {sections.map((section, index) => (
-              <div key={index} className="bg-white/5 border border-white/10 rounded-sm p-8 relative space-y-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white/30 uppercase tracking-[0.2em]">Section {index + 1}</span>
-                </div>
-
-                <div className="space-y-6">
-                  {/* Section x Image */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-white/50 uppercase tracking-widest">Section {index + 1} Image URL</label>
-                    <input
-                      type="text"
-                      value={section.visual?.src || ""}
-                      onChange={(e) => updateSection(index, 'visual', { src: e.target.value })}
-                      placeholder="https://..."
-                      className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white"
-                    />
+              <div key={index} className="group relative">
+                <div className="absolute -left-4 top-0 bottom-0 w-1 bg-arcium-blue/20 group-hover:bg-arcium-blue transition-colors rounded-full" />
+                
+                <div className="bg-[#0A0A0A] border border-white/10 rounded-sm p-8 space-y-8 shadow-2xl relative">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Section {index + 1}</span>
+                    {sections.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeSection(index)}
+                        className="text-[10px] font-bold text-red-500/50 hover:text-red-500 transition-colors uppercase tracking-widest border border-red-500/10 hover:border-red-500/50 px-3 py-1 rounded-sm"
+                      >
+                        Remove Section
+                      </button>
+                    )}
                   </div>
 
-                  {/* Section x Heading */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-white/50 uppercase tracking-widest">Section {index + 1} Heading</label>
-                    <textarea
-                      value={section.title}
-                      onChange={(e) => updateSection(index, 'title', e.target.value)}
-                      rows={2}
-                      placeholder="Section title..."
-                      className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white resize-y"
-                    />
-                  </div>
+                  <div className="space-y-8">
+                    {/* Section x Image */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Section {index + 1} Image URL (Optional)</label>
+                      <input
+                        type="text"
+                        value={section.visual?.src || ""}
+                        onChange={(e) => updateSection(index, 'visual', { src: e.target.value })}
+                        placeholder="https://images.unsplash.com/..."
+                        className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white text-sm font-mono"
+                      />
+                    </div>
 
-                  {/* Section x Body */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-white/50 uppercase tracking-widest">Section {index + 1} Body</label>
-                    <textarea
-                      value={section.body}
-                      onChange={(e) => updateSection(index, 'body', e.target.value)}
-                      rows={6}
-                      placeholder="Section content..."
-                      className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white resize-y"
-                    />
-                  </div>
-                </div>
+                    {/* Section x Heading */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Section {index + 1} Heading</label>
+                      <textarea
+                        value={section.title}
+                        onChange={(e) => updateSection(index, 'title', e.target.value)}
+                        rows={2}
+                        placeholder="Headline for this section..."
+                        className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white font-bold text-lg"
+                      />
+                    </div>
 
-                {/* Remove section button */}
-                <div className="pt-4 border-t border-white/5 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => removeSection(index)}
-                    className="flex items-center gap-2 text-red-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-wider"
-                  >
-                    <Trash2 size={14} /> Remove Section {index + 1}
-                  </button>
+                    {/* Section x Body */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Section {index + 1} Body</label>
+                      <textarea
+                        value={section.body}
+                        onChange={(e) => updateSection(index, 'body', e.target.value)}
+                        rows={8}
+                        placeholder="Detailed content for this section..."
+                        className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white leading-relaxed"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="flex justify-center pt-4">
+          <div className="flex justify-center">
             <button
               type="button"
               onClick={addSection}
-              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-sm transition-colors text-sm font-bold uppercase tracking-wider border border-white/5"
+              className="group flex items-center gap-3 bg-white/5 hover:bg-arcium-blue text-white hover:text-black px-10 py-4 rounded-sm transition-all duration-300 font-bold uppercase tracking-widest border border-white/10 hover:border-arcium-blue shadow-lg"
             >
-              <Plus size={18} /> Add New Section
+              <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" /> 
+              Add New Section
             </button>
           </div>
         </div>
 
-        {/* Hidden / Advanced Fields */}
-        <div className="bg-white/5 border border-white/10 rounded-sm p-8 space-y-6">
-          <h3 className="text-lg font-bold">Metadata & Interactivity</h3>
-          <div className="grid grid-cols-1 gap-6">
+        {/* --- ADVANCED / QUIZ --- */}
+        <div className="bg-[#0A0A0A] border border-white/10 rounded-sm p-8 space-y-8 shadow-2xl opacity-60 hover:opacity-100 transition-opacity">
+          <h2 className="text-xl font-bold uppercase tracking-widest text-white/40 border-b border-white/5 pb-4">Advanced Configuration</h2>
+          
+          <div className="grid grid-cols-1 gap-8">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-white/50 uppercase tracking-widest">Visualization ID</label>
+              <label className="text-xs font-bold text-white/50 uppercase tracking-widest">Visualization ID (Advanced)</label>
               <input
                 type="text"
                 name="visualizationId"
                 defaultValue={initialData?.visualizationId}
-                placeholder="Optional ID for custom visuals..."
-                className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white"
+                placeholder="e.g. privacy-paradigm-anim"
+                className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white font-mono"
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-white/50 uppercase tracking-widest">Quiz Questions (JSON)</label>
-              <textarea
-                name="quizQuestions"
-                value={quizQuestionsStr}
-                onChange={(e) => setQuizQuestionsStr(e.target.value)}
-                rows={4}
-                className="w-full bg-white/5 border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white font-mono text-sm resize-y"
-              />
-            </div>
+            <QuizBuilder 
+              initialQuestions={quizQuestions} 
+              onChange={handleQuizChange} 
+            />
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-12 border-t border-white/10">
-          <div>
+        {/* --- FORM ACTIONS --- */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-10 border-t border-white/10">
+          <div className="flex items-center gap-4">
             {isEdit && (
               <button
                 type="button"
                 onClick={() => setIsDeleting(true)}
-                className="text-red-500 hover:text-red-400 font-medium px-4 py-2 rounded-sm border border-red-500/30 hover:bg-red-500/10 transition-colors flex items-center gap-2 text-sm uppercase tracking-wider"
+                className="text-red-500 hover:text-white px-6 py-3 rounded-sm border border-red-500/20 hover:bg-red-600 transition-all font-bold uppercase tracking-widest text-xs flex items-center gap-2"
               >
                 <Trash2 size={16} />
                 Delete Module
               </button>
             )}
+            {/* Autosave Indicator */}
+            <div className="flex items-center gap-2 text-xs text-white/40">
+              <Save size={12} />
+              {lastSaved ? (
+                <span>Autosaved {formatTimeAgo(lastSaved)}</span>
+              ) : (
+                <span>Changes autosave every 30s</span>
+              )}
+            </div>
           </div>
-          <button
-            type="submit"
-            className="bg-arcium-blue text-black px-12 py-4 rounded-sm font-bold hover:bg-arcium-blue/90 transition-colors uppercase tracking-widest shadow-xl shadow-arcium-blue/20 text-lg"
-          >
-            {isEdit ? "Update Module" : "Create Module"}
-          </button>
+          
+          <div className="flex items-center gap-6">
+             <Link href="/staff/modules" className="text-white/40 hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">
+               Cancel
+             </Link>
+             <button
+              type="submit"
+              className="bg-arcium-blue text-black px-16 py-5 rounded-sm font-black hover:bg-white transition-all uppercase tracking-[0.2em] shadow-2xl shadow-arcium-blue/20 text-lg hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {isEdit ? "Save Changes" : "Publish Module"}
+            </button>
+          </div>
         </div>
       </form>
 
       {/* Delete Confirmation Modal */}
       {isDeleting && isEdit && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-[#050505] border border-white/10 p-10 max-w-md w-full animate-in fade-in zoom-in-95 duration-200 shadow-2xl">
-            <h3 className="text-2xl font-bold mb-4 text-white">Delete Module?</h3>
-            <p className="text-white/60 mb-10 leading-relaxed">
-              This will permanently remove <span className="text-white font-bold">{initialData?.title}</span> from the Arcium Codex curriculum.
+          <div className="bg-[#050505] border border-white/10 p-12 max-w-md w-full animate-in fade-in zoom-in-95 duration-200 shadow-2xl rounded-sm">
+            <h3 className="text-3xl font-black mb-6 text-white uppercase tracking-tighter italic">Confirm Deletion</h3>
+            <p className="text-white/50 mb-10 leading-relaxed font-medium">
+              Are you sure you want to permanently delete <span className="text-arcium-blue font-bold underline">{initialData?.title}</span>? This action cannot be undone.
             </p>
-            <div className="flex items-center justify-end gap-6">
+            <div className="flex items-center justify-end gap-8">
               <button
                 type="button"
                 onClick={() => setIsDeleting(false)}
-                className="px-4 py-2 hover:text-white transition-colors font-bold text-xs uppercase tracking-widest text-white/40"
+                className="font-bold text-xs uppercase tracking-[0.3em] text-white/30 hover:text-white transition-colors"
               >
-                Cancel
+                Back
               </button>
               <form action={() => deleteModuleLesson(initialData?.slug || "")}>
                 <button
                   type="submit"
-                  className="bg-red-600 text-white px-8 py-3 font-bold hover:bg-red-500 transition-colors text-xs uppercase tracking-widest shadow-lg shadow-red-600/20"
+                  className="bg-red-600 text-white px-10 py-4 font-black hover:bg-red-500 transition-all text-xs uppercase tracking-[0.3em] shadow-xl shadow-red-600/20"
                 >
-                  Confirm Delete
+                  Delete Forever
                 </button>
               </form>
             </div>
@@ -313,4 +412,20 @@ export default function ModuleForm({
       )}
     </div>
   );
+}
+
+// Helper function to format time ago
+function formatTimeAgo(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSecs = Math.floor(diffMs / 1000);
+  const diffMins = Math.floor(diffSecs / 60);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffSecs < 60) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
 }
