@@ -1,0 +1,11 @@
+{
+  "id": "security",
+  "slug": "security",
+  "title": "Security",
+  "tag": "ASSURANCE",
+  "summary": "The mathematical and protocol-level security guarantees of Arcium.",
+  "bodySections": [],
+  "prefix": "04.",
+  "description": "Security models and cryptographic proof systems.",
+  "group": "knowledge"
+}

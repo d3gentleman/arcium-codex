@@ -14,15 +14,33 @@ function getConnectionString() {
   return connectionString;
 }
 
-export const db =
-  globalThis.__learnarciumPool ??
-  new Pool({
-    connectionString: getConnectionString(),
-  });
+let pool: Pool | undefined;
 
-if (process.env.NODE_ENV !== "production") {
-  globalThis.__learnarciumPool = db;
+function getPool() {
+  if (globalThis.__learnarciumPool) {
+    return globalThis.__learnarciumPool;
+  }
+
+  if (!pool) {
+    pool = new Pool({
+      connectionString: getConnectionString(),
+    });
+
+    if (process.env.NODE_ENV !== "production") {
+      globalThis.__learnarciumPool = pool;
+    }
+  }
+
+  return pool;
 }
+
+// Export a proxy or a wrapper to maintain the existing API
+export const db = {
+  query: <T extends QueryResultRow = QueryResultRow>(text: string, params?: unknown[]) => getPool().query<T>(text, params),
+  connect: () => getPool().connect(),
+  on: (event: "error" | "release" | "connect" | "acquire" | "remove", listener: (...args: any[]) => void) => getPool().on(event, listener),
+  end: () => pool?.end(),
+} as unknown as Pool;
 
 export async function query<T extends QueryResultRow = QueryResultRow>(
   text: string,

@@ -1,0 +1,11 @@
+{
+  "id": "execution",
+  "slug": "execution",
+  "title": "Execution",
+  "tag": "RUNTIME",
+  "summary": "How confidential compute actually runs across the network nodes.",
+  "bodySections": [],
+  "prefix": "03.",
+  "description": "Mechanisms of confidential execution.",
+  "group": "knowledge"
+}

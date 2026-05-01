@@ -3,11 +3,11 @@
   "title": "Introduction to Codex",
   "categoryId": "fundamentals",
   "tag": "CORE",
-  "summary": "A first-pass lesson on how the atlas is organized, how to read its records, and why Arcium is framed as confidential execution infrastructure.",
+  "summary": "A first-pass lesson on how Arcium is organized, how to read its records, and why Arcium is framed as confidential execution infrastructure.",
   "bodySections": [
     {
       "title": "Orientation",
-      "body": "The atlas is a guided reading surface, not just a static archive. Each lesson is meant to turn protocol terminology into a more legible system map.\n\nThe shortest useful framing for Arcium is that it lets applications compute on sensitive inputs without forcing a single operator to see all of the underlying data."
+      "body": "Arcium Codex is a guided reading surface, not just a static archive. Each lesson is meant to turn protocol terminology into a more legible system map.\n\nThe shortest useful framing for Arcium is that it lets applications compute on sensitive inputs without forcing a single operator to see all of the underlying data."
     },
     {
       "title": "Why It Matters",
@@ -25,7 +25,7 @@
     {
       "id": "atlas-purpose",
       "type": "multiple_choice",
-      "prompt": "What is the primary purpose of the atlas?",
+      "prompt": "What is the primary purpose of the Codex?",
       "required": true,
       "choices": [
         "To organize protocol knowledge into an explorable learning surface",

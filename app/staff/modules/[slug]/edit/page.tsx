@@ -15,7 +15,7 @@ export default async function EditModulePage({
   const { slug } = await params;
 
   const [categories, moduleData] = await Promise.all([
-    getKnowledgeCategories(),
+    getKnowledgeCategories('knowledge'),
     getModuleLessonBySlug(slug),
   ]);
 

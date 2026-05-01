@@ -1,0 +1,53 @@
+{
+  "skills": [
+    {
+      "source": "coreyhaines31/marketingskills",
+      "skills": [
+        "copywriting"
+      ]
+    },
+    {
+      "source": "infsh-skills/skills",
+      "skills": [
+        "ai-image-generation"
+      ]
+    },
+    {
+      "source": "mattpocock/skills",
+      "skills": [
+        "improve-codebase-architecture"
+      ]
+    },
+    {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "skills": [
+        "ui-ux-pro-max"
+      ]
+    },
+    {
+      "source": "obra/superpowers",
+      "skills": [
+        "brainstorming",
+        "executing-plans"
+      ]
+    },
+    {
+      "source": "vercel-labs/agent-skills",
+      "skills": [
+        "web-design-guidelines"
+      ]
+    },
+    {
+      "source": "vercel-labs/next-skills",
+      "skills": [
+        "next-best-practices"
+      ]
+    },
+    {
+      "source": "vercel-labs/skills",
+      "skills": [
+        "find-skills"
+      ]
+    }
+  ]
+}

@@ -14,7 +14,7 @@ export async function saveModuleLesson(formData: FormData) {
   const slug = formData.get("slug") as string;
   const title = formData.get("title") as string;
   const categoryId = formData.get("categoryId") as string;
-  const tag = formData.get("tag") as string;
+  const tag = (formData.get("tag") as string) || "Module";
   const summary = formData.get("summary") as string;
   const introductionHeading = formData.get("introductionHeading") as string;
   const introduction = formData.get("introduction") as string;
@@ -22,6 +22,8 @@ export async function saveModuleLesson(formData: FormData) {
   
   const bodySectionsStr = formData.get("bodySections") as string;
   const quizQuestionsStr = formData.get("quizQuestions") as string;
+
+  console.log(`Saving module: ${title} (${slug}) - isEdit: ${isEdit}`);
 
   let bodySections = [];
   let quizQuestions = [];

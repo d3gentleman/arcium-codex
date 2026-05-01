@@ -1,0 +1,11 @@
+{
+  "id": "economics",
+  "slug": "economics",
+  "title": "Economics",
+  "tag": "INCENTIVES",
+  "summary": "Tokenomics, node rewards, and the economic sustainability of the protocol.",
+  "bodySections": [],
+  "prefix": "05.",
+  "description": "The economic layer of the Arcium ecosystem.",
+  "group": "knowledge"
+}

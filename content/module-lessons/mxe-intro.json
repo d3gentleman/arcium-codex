@@ -9,7 +9,7 @@
   "bodySections": [
     {
       "title": "Execution Surface",
-      "body": "MXE stands for MPC eXecution Environment. In the atlas, it refers to the place where protected computation happens in a way that is operationally meaningful to applications.\n\nThis is the bridge between theory and product behavior: confidential logic needs a place to execute, and MXEs are that place.",
+      "body": "MXE stands for MPC eXecution Environment. In Arcium, it refers to the place where protected computation happens in a way that is operationally meaningful to applications.\n\nThis is the bridge between theory and product behavior: confidential logic needs a place to execute, and MXEs are that place.",
       "visual": {
         "type": "image",
         "src": "/images/lessons/mxe-surface.png",

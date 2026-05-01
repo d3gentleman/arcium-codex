@@ -28,8 +28,8 @@ export default function Hero({ hero, quickLinks, liveStatusFeed }: HeroProps) {
             </div>
             
             <h1 className="text-6xl md:text-8xl font-headline font-bold leading-[0.85] tracking-tighter text-white uppercase">
-              MASTERING
-              <span className="block text-primary">INFRASTRUCTURE</span>
+              ARCIUM
+              <span className="block text-primary">ACADEMY</span>
             </h1>
           </header>
 

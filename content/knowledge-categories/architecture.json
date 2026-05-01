@@ -1,0 +1,11 @@
+{
+  "id": "architecture",
+  "slug": "architecture",
+  "title": "Architecture",
+  "tag": "DESIGN",
+  "summary": "Deep dive into the system architecture, consensus, and network topology.",
+  "bodySections": [],
+  "prefix": "02.",
+  "description": "The technical design of the Arcium network.",
+  "group": "knowledge"
+}

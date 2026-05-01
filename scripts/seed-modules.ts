@@ -53,15 +53,16 @@ async function main() {
 
       await client.query(
         `INSERT INTO module_lesson (
-          slug, title, category_id, tag, summary, introduction, visualization_id, body_sections, quiz_questions
+          slug, title, category_id, tag, summary, introduction, introduction_heading, visualization_id, body_sections, quiz_questions
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
         ) ON CONFLICT (slug) DO UPDATE SET
           title = EXCLUDED.title,
           category_id = EXCLUDED.category_id,
           tag = EXCLUDED.tag,
           summary = EXCLUDED.summary,
           introduction = EXCLUDED.introduction,
+          introduction_heading = EXCLUDED.introduction_heading,
           visualization_id = EXCLUDED.visualization_id,
           body_sections = EXCLUDED.body_sections,
           quiz_questions = EXCLUDED.quiz_questions,
@@ -74,6 +75,7 @@ async function main() {
           data.tag,
           data.summary,
           data.introduction || null,
+          data.introductionHeading || null,
           data.visualizationId || null,
           JSON.stringify(data.bodySections || []),
           JSON.stringify(data.quizQuestions || []),

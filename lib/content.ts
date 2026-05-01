@@ -24,9 +24,11 @@ const reader = createReader(process.cwd(), keystaticConfig);
 
 // --- CATEGORIES ---
 
-export async function getKnowledgeCategories(): Promise<KnowledgeCategoryRecord[]> {
+export async function getKnowledgeCategories(group?: 'knowledge' | 'ecosystem'): Promise<KnowledgeCategoryRecord[]> {
   const categories = await reader.collections.knowledgeCategories.all();
-  return categories.map(cat => ({
+  return categories
+    .filter(cat => !group || (cat.entry as any).group === group)
+    .map(cat => ({
     ...cat.entry,
     slug: cat.slug,
   })) as KnowledgeCategoryRecord[];

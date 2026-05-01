@@ -20,6 +20,7 @@ export default async function StaffLayout({
           <span className="font-bold text-xl tracking-tighter text-arcium-blue">ARCIUM // STAFF</span>
           <nav className="flex gap-6 text-sm text-white/70">
             <Link href="/staff/modules" className="hover:text-white transition-colors">Modules</Link>
+            <Link href="/staff/modules/new" className="hover:text-white transition-colors">New Module</Link>
             <Link href="/" className="hover:text-white transition-colors">Exit to App</Link>
           </nav>
         </div>

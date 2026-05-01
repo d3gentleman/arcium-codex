@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 export default async function NewModulePage() {
   await requireStaffSession();
 
-  const categories = await getKnowledgeCategories();
+  const categories = await getKnowledgeCategories('knowledge');
   
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
