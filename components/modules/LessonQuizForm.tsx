@@ -17,6 +17,9 @@ import {
   Lock,
   XCircle,
   Lightbulb,
+  History,
+  RotateCcw,
+  TrendingUp,
 } from "lucide-react";
 
 interface QuestionResult {
@@ -41,6 +44,19 @@ interface LessonQuizFormProps {
   questions: QuizQuestion[];
   canSubmit: boolean;
   isCompleted: boolean;
+}
+
+interface SubmissionHistory {
+  id: number;
+  submittedAt: string;
+  scorePercent: number | null;
+  passed: boolean | null;
+}
+
+interface ProgressInfo {
+  attemptCount: number;
+  bestScorePercent: number | null;
+  completedAt: string | null;
 }
 
 const QuestionTypeIcon = ({ type }: { type: QuizQuestion["type"] }) => {
@@ -71,8 +87,14 @@ export default function LessonQuizForm({
   const [score, setScore] = useState<QuizScore | null>(null);
   const [results, setResults] = useState<QuestionResult[] | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  
+  // Submission history state
+  const [history, setHistory] = useState<SubmissionHistory[]>([]);
+  const [progress, setProgress] = useState<ProgressInfo | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedAttempt, setSelectedAttempt] = useState<number | null>(null);
 
-  // Load draft answers from localStorage on mount
+  // Load draft answers and submission history on mount
   useEffect(() => {
     const saved = localStorage.getItem(`quiz-draft-${lessonSlug}`);
     if (saved) {
@@ -89,7 +111,23 @@ export default function LessonQuizForm({
         // Ignore parse errors
       }
     }
+    
+    // Load submission history
+    fetchHistory();
   }, [lessonSlug]);
+  
+  const fetchHistory = async () => {
+    try {
+      const response = await fetch(`/api/lessons/${lessonSlug}/quiz/history`);
+      if (response.ok) {
+        const data = await response.json();
+        setHistory(data.history || []);
+        setProgress(data.progress || null);
+      }
+    } catch {
+      // Silently fail - history is not critical
+    }
+  };
 
   // Save draft answers to localStorage
   useEffect(() => {
@@ -144,6 +182,9 @@ export default function LessonQuizForm({
       setSuccess(payload.score?.passed 
         ? `Quiz passed! Score: ${payload.score?.earnedPoints ?? 0}/${payload.score?.totalPoints ?? 0} (${payload.score?.percentage ?? 0}%)`
         : `Quiz completed. Score: ${payload.score?.earnedPoints ?? 0}/${payload.score?.totalPoints ?? 0} (${payload.score?.percentage ?? 0}%) - Review recommended`);
+      
+      // Refresh history after submission
+      await fetchHistory();
       router.refresh();
     } catch {
       setError("Unable to submit your quiz right now.");
@@ -228,6 +269,71 @@ export default function LessonQuizForm({
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Progress Stats */}
+      {progress && progress.attemptCount > 0 && (
+        <div className="rounded-[1rem] border border-outline-variant/20 bg-surface-container-low p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <History size={14} className="text-primary/60" />
+                <span className="text-xs text-on-surface-variant">
+                  <span className="font-bold text-white">{progress.attemptCount}</span> attempt{progress.attemptCount !== 1 ? 's' : ''}
+                </span>
+              </div>
+              {progress.bestScorePercent !== null && (
+                <div className="flex items-center gap-2">
+                  <TrendingUp size={14} className="text-primary/60" />
+                  <span className="text-xs text-on-surface-variant">
+                    Best: <span className="font-bold text-primary">{progress.bestScorePercent}%</span>
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            {history.length > 0 && (
+              <button
+                onClick={() => setShowHistory(!showHistory)}
+                className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70 hover:text-primary transition-colors flex items-center gap-1"
+              >
+                {showHistory ? 'Hide' : 'View'} History
+                <RotateCcw size={12} className={`transition-transform ${showHistory ? 'rotate-180' : ''}`} />
+              </button>
+            )}
+          </div>
+          
+          {/* Submission History Dropdown */}
+          {showHistory && history.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-outline-variant/10 space-y-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/50 mb-2">
+                Previous Attempts
+              </p>
+              {history.map((attempt, index) => (
+                <div 
+                  key={attempt.id}
+                  className="flex items-center justify-between py-2 px-3 rounded-lg bg-black/20"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-on-surface-variant/50">#{index + 1}</span>
+                    <span className="text-xs text-on-surface-variant">
+                      {new Date(attempt.submittedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {attempt.scorePercent !== null ? (
+                      <span className={`text-xs font-bold ${attempt.passed ? 'text-primary' : 'text-error/80'}`}>
+                        {attempt.scorePercent}%
+                      </span>
+                    ) : (
+                      <span className="text-xs text-on-surface-variant/50">Pending</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

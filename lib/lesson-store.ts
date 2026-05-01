@@ -137,3 +137,66 @@ export async function getLessonCommentCountForUser(userId: string): Promise<numb
 
   return Number(result.rows[0]?.count || "0");
 }
+
+export interface QuizSubmission {
+  id: number;
+  lessonSlug: string;
+  answers: Record<string, string>;
+  scorePercent: number | null;
+  passed: boolean | null;
+  submittedAt: string;
+}
+
+export async function getQuizSubmissionHistory(
+  userId: string,
+  lessonSlug: string
+): Promise<QuizSubmission[]> {
+  const result = await query<{
+    id: number;
+    lesson_slug: string;
+    answers: Record<string, string>;
+    score_percent: number | null;
+    passed: boolean | null;
+    submitted_at: string;
+  }>(
+    `select id, lesson_slug, answers, score_percent, passed, submitted_at
+       from lesson_quiz_submission
+      where user_id = $1
+        and lesson_slug = $2
+      order by submitted_at desc`,
+    [userId, lessonSlug],
+  );
+
+  return result.rows.map((row) => ({
+    id: row.id,
+    lessonSlug: row.lesson_slug,
+    answers: row.answers,
+    scorePercent: row.score_percent,
+    passed: row.passed,
+    submittedAt: row.submitted_at,
+  }));
+}
+
+export async function getLessonProgress(userId: string, lessonSlug: string) {
+  const result = await query<{
+    attempt_count: number;
+    best_score_percent: number | null;
+    completed_at: string | null;
+  }>(
+    `select attempt_count, best_score_percent, completed_at
+       from lesson_progress
+      where user_id = $1
+        and lesson_slug = $2`,
+    [userId, lessonSlug],
+  );
+
+  if (result.rows.length === 0) {
+    return null;
+  }
+
+  return {
+    attemptCount: result.rows[0].attempt_count,
+    bestScorePercent: result.rows[0].best_score_percent,
+    completedAt: result.rows[0].completed_at,
+  };
+}
