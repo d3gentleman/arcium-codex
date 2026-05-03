@@ -23,7 +23,7 @@
       "choices": []
     },
     {
-      "id": "atlas-purpose",
+      "id": "academy-purpose",
       "type": "multiple_choice",
       "prompt": "What is the primary purpose of the Codex?",
       "required": true,

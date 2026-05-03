@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import Footer from './Footer';
-import NavBar from './NavBar';
-import { getFooterConfig, getNavigation } from '@/lib/content';
-import { LinkAction, FooterConfig } from '../types/domain';
+import { getFooterConfig } from '@/lib/content';
+import { FooterConfig } from '../types/domain';
 
 interface Breadcrumb {
   label: string;
@@ -29,12 +28,10 @@ export default async function KnowledgePageFrame({
   meta,
   children,
 }: KnowledgePageFrameProps) {
-  const navLinks: LinkAction[] = await getNavigation();
   const footerConfig: FooterConfig = await getFooterConfig();
 
   return (
     <>
-      <NavBar links={navLinks} />
       <section className="console-window col-span-12 overflow-hidden">
         <div className="console-header">
           <span>{eyebrow}</span>

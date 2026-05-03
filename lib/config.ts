@@ -147,11 +147,11 @@ export const UI_STRINGS: UIConfig = {
   heroWaitingQuery: "_WAITING_FOR_QUERY...",
   heroSysTools: "System_Tools:",
   heroGenReport: "Generate_System_Report",
-  heroViewport: "VIEWPORT_PRIMARY: ECOSYSTEM_ATLAS",
+  heroViewport: "VIEWPORT_PRIMARY: ECOSYSTEM_ACADEMY",
   heroMode: "MODE: ECOSYSTEM_OVERVIEW",
   heroRenderActive: "REALTIME_RENDER_ACTIVE",
   heroZoom: "ZOOM: 1.0X",
-  heroAtlasTerritories: "Territories",
+  heroAcademyTerritories: "Territories",
   heroFeaturedSystems: "Featured Systems",
   filterLegendDesc: "ACTIVE_FILTERS",
   filterAllStr: "View All",
@@ -161,13 +161,13 @@ export const UI_STRINGS: UIConfig = {
   mapSearchNoResults: "No systems match this query yet.",
   mapOverviewState: "Ecosystem Hub",
   mapFocusState: "Focused Project",
-  backToAtlas: "← Back to Hub",
-  discoveryOpen: "Open Atlas Search",
+  backToAcademy: "← Back to Academy Hub",
+  discoveryOpen: "Open Academy Search",
   discoveryClose: "Close Search",
   discoverySearchPlaceholder: "Search builders, glossary terms, MXEs, and guides...",
   discoverySearchHint: "CTRL/CMD + K // ESC to close",
   discoveryInitialState: "Search Arcium builders, glossary terms, developer guides, and category pages.",
-  discoveryNoResultsTitle: "No atlas records matched this query.",
+  discoveryNoResultsTitle: "No academy records matched this query.",
   discoveryNoResultsBody: "Try a glossary term, builder, MXE topic, or category name.",
   discoveryGroupCore: "Core Network",
   discoveryGroupProjects: "Builders",
@@ -201,7 +201,7 @@ export const HOMEPAGE_CONFIG = {
   hero: {
     subtitle: "Core Functionality: Exploration",
     titleLine1: "NAVIGATE THE",
-    titleLine2: "ECOSYSTEM_ATLAS",
+    titleLine2: "ECOSYSTEM_ACADEMY",
     description: "Explore the builders, guides, and private computation concepts that make the Arcium network legible.",
     primaryCta: {
       type: "internal" as const,
@@ -219,7 +219,7 @@ export const HOMEPAGE_CONFIG = {
       prefix: "SYS_A",
       tag: "Subsystem_A",
       title: "Understanding Arcium",
-      description: "A concise overview of Arcium as a confidential execution layer and why it matters across the rest of the atlas.",
+      description: "A concise overview of Arcium as a confidential execution layer and why it matters across the rest of Arcium Academy.",
       action: {
         type: "internal" as const,
         label: "Read Guide",
@@ -241,7 +241,7 @@ export const HOMEPAGE_CONFIG = {
       prefix: "GRID",
       tag: "Optimization",
       title: "Ecosystem Overview",
-      description: "A quick orientation to the major territories on the Arcium map and how to read them.",
+      description: "A quick orientation to the major territories on the Arcium ecosystem map and how to read them.",
       action: {
         type: "internal" as const,
         label: "Read Overview",
@@ -269,7 +269,7 @@ export const HOMEPAGE_CONFIG = {
   liveStatusFeed: [
     {
       status: "OK",
-      text: "Atlas_Sync: Complete"
+      text: "Academy_Sync: Complete"
     },
     {
       status: "OK",

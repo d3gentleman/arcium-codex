@@ -15,7 +15,7 @@ interface ShellSwitcherProps {
 
 /**
  * ShellSwitcher conditionally renders the DiscoveryShell based on the current path.
- * This prevents the global atlas UI (grid, scanlines, discovery) from interfering
+ * This prevents the global academy UI (grid, scanlines, discovery) from interfering
  * with the Keystatic Admin dashboard and login pages.
  */
 export default function ShellSwitcher({ children, discoveryItems, navLinks, ui }: ShellSwitcherProps) {

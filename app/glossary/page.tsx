@@ -8,7 +8,7 @@ import {
 } from '@/lib/content';
 
 export const metadata: Metadata = {
-  title: 'Glossary | ARCIUM ATLAS',
+  title: 'Glossary | ARCIUM ACADEMY',
   description: 'An A-Z reference for Arcium terms, with local summaries and source links back to the official docs.',
 };
 
@@ -47,7 +47,7 @@ export default async function GlossaryPage() {
     <KnowledgePageFrame
       eyebrow="GLOSSARY_INDEX"
       title="Arcium Reference Glossary"
-      summary="A top-level reference surface for the atlas: browse Arcium terminology alphabetically, search aliases and keywords, and jump from each term into deeper encyclopedia context."
+      summary="A top-level reference surface for Arcium Academy: browse Arcium terminology alphabetically, search aliases and keywords, and jump from each term into deeper encyclopedia context."
       statusLabel="GLOSSARY_LINKED"
       breadcrumbs={[
         { label: 'Home', href: '/' },

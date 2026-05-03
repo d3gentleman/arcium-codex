@@ -9,8 +9,8 @@ import {
 } from '@/lib/content';
 
 export const metadata: Metadata = {
-  title: 'Encyclopedia | ARCIUM ATLAS',
-  description: 'Browse category pages, guides, and recent articles for the Arcium Atlas knowledge base.',
+  title: 'Encyclopedia | ARCIUM ACADEMY',
+  description: 'Browse category pages, guides, and recent articles for the Arcium Academy knowledge base.',
 };
 
 export default async function EncyclopediaPage() {
@@ -28,7 +28,7 @@ export default async function EncyclopediaPage() {
     <KnowledgePageFrame
       eyebrow="ENCYCLOPEDIA_INDEX"
       title="Arcium Knowledge Grid"
-      summary="A scaffolded reference layer for the atlas: browse broad knowledge categories, open territory guides, and move from the homepage shell into working article routes."
+      summary="A scaffolded reference layer for Arcium Academy: browse broad knowledge categories, open territory guides, and move from the homepage shell into working article routes."
       statusLabel="KNOWLEDGE_ROUTES_ONLINE"
       breadcrumbs={[
         { label: 'Home', href: '/' },

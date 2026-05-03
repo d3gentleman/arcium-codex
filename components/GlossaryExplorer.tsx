@@ -325,7 +325,7 @@ export default function GlossaryExplorer({ terms }: GlossaryExplorerProps) {
                         {term.relatedLinks.length > 0 ? (
                           <div className="mt-5">
                             <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.22em] text-primary/80">
-                              Related Atlas Paths
+                              Related Academy Paths
                             </div>
                             <div className="flex flex-wrap gap-2">
                               {term.relatedLinks.map((link) => (

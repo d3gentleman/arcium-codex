@@ -22,7 +22,7 @@ export default function AuthShell({ title, eyebrow, subtitle, children }: AuthSh
         {children}
         <div className="mt-8 border-t border-outline-variant/20 pt-4 text-center text-[10px] uppercase tracking-[0.18em] text-on-surface-variant/50">
           <Link href="/" className="transition-colors hover:text-primary">
-            Return to Atlas
+            Return to Academy
           </Link>
         </div>
       </div>

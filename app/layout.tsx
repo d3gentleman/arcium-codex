@@ -20,7 +20,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'ARCIUM ATLAS | ECOSYSTEM_CORE',
+  title: 'ARCIUM ACADEMY | ECOSYSTEM_CORE',
   description: 'Educational hub about the Arcium ecosystem.',
 };
 

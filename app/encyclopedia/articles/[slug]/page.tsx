@@ -30,12 +30,12 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 
   if (!article) {
     return {
-      title: 'Article Not Found | ARCIUM ATLAS',
+      title: 'Article Not Found | ARCIUM ACADEMY',
     };
   }
 
   return {
-    title: `${article.title} | Encyclopedia | ARCIUM ATLAS`,
+    title: `${article.title} | Encyclopedia | ARCIUM ACADEMY`,
     description: article.summary,
   };
 }

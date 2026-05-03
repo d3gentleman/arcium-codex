@@ -31,12 +31,12 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
   if (!category) {
     return {
-      title: 'Category Not Found | ARCIUM ATLAS',
+      title: 'Category Not Found | ARCIUM ACADEMY',
     };
   }
 
   return {
-    title: `${category.title} | Encyclopedia | ARCIUM ATLAS`,
+    title: `${category.title} | Encyclopedia | ARCIUM ACADEMY`,
     description: category.summary,
   };
 }
@@ -61,7 +61,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <KnowledgePageFrame
-      eyebrow={`CATEGORY // ${(category.group || 'atlas').toUpperCase()}`}
+      eyebrow={`CATEGORY // ${(category.group || 'academy').toUpperCase()}`}
       title={category.title}
       summary={category.summary}
       statusLabel={category.group === 'ecosystem' ? 'TERRITORY_GUIDE_READY' : 'REFERENCE_GUIDE_READY'}
