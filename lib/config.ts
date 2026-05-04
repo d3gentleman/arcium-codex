@@ -38,6 +38,13 @@ export const NAVIGATION_CONFIG: LinkAction[] = [
     section: "PRIMARY"
   },
   {
+    type: "internal",
+    label: "Profile",
+    href: "/account",
+    icon: "User",
+    section: "PRIMARY"
+  },
+  {
     type: "unavailable",
     label: "Terminal",
     reason: "Secure terminal environment is initializing.",

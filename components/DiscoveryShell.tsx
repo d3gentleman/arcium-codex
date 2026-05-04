@@ -366,7 +366,10 @@ export function useDiscovery() {
 export default function DiscoveryShell({ children, items, ui }: DiscoveryShellProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const isOpenRef = useRef(isOpen);
   const triggerRef = useRef<HTMLElement | null>(null);
+
+  isOpenRef.current = isOpen;
 
   const closeDiscovery = useCallback(({ restoreFocus = true }: DiscoveryControlOptions = {}) => {
     setIsOpen(false);
@@ -433,13 +436,15 @@ export default function DiscoveryShell({ children, items, ui }: DiscoveryShellPr
     };
   }, [isOpen]);
 
+  // Close palette on navigation. Use a ref for `isOpen` so we do not re-run when
+  // the palette opens (that used to immediately setIsOpen(false) and flicker closed).
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpenRef.current) {
       return;
     }
 
     setIsOpen(false);
-  }, [isOpen, pathname]);
+  }, [pathname]);
 
   return (
     <DiscoveryContext.Provider value={value}>

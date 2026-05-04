@@ -262,21 +262,18 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
     return true;
   };
 
-  const renderQuestionCard = (question: QuizQuestion, index: number) => {
-    const isEditing = mode.type === 'editing' && mode.questionId === question.id;
-    const isCreating = mode.type === 'creating';
-    
-    if (isEditing && draft) {
-      return (
+  const renderDraftForm = (headerLabel: string) => {
+    if (!draft) return null;
+    return (
         <div className="rounded-lg border border-arcium-blue/40 bg-arcium-blue/5 p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <QuestionTypeIcon type={draft.type} />
               <span className="text-xs font-bold uppercase tracking-widest text-arcium-blue">
-                Editing Question {index + 1}
+                {headerLabel}
               </span>
             </div>
-            <button 
+            <button type="button" 
               onClick={cancelEditing}
               className="text-white/40 hover:text-white text-xs uppercase tracking-widest"
             >
@@ -295,45 +292,6 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
               placeholder="Enter your question..."
             />
           </div>
-
-          {/* Multiple Choice Options */}
-          {draft.type === 'multiple_choice' && (
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-white/50">Choices</label>
-              {draft.choices?.map((choice, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={choice}
-                    onChange={(e) => {
-                      const newChoices = [...(draft.choices || [])];
-                      newChoices[i] = e.target.value;
-                      updateDraft({ choices: newChoices });
-                    }}
-                    className="flex-1 bg-black border border-white/10 rounded-sm px-3 py-2 text-sm text-white focus:border-arcium-blue focus:outline-none"
-                    placeholder={`Choice ${i + 1}`}
-                  />
-                  {draft.choices && draft.choices.length > 2 && (
-                    <button
-                      onClick={() => {
-                        const newChoices = draft.choices?.filter((_, idx) => idx !== i);
-                        updateDraft({ choices: newChoices });
-                      }}
-                      className="text-red-500/50 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                onClick={() => updateDraft({ choices: [...(draft.choices || []), ''] })}
-                className="text-xs text-arcium-blue hover:text-white uppercase tracking-widest"
-              >
-                + Add Choice
-              </button>
-            </div>
-          )}
 
           {/* Checkbox Options (shared UI for multiple_choice and checkbox) */}
           {(draft.type === 'multiple_choice' || draft.type === 'checkbox') && (
@@ -370,7 +328,7 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
                     />
                   )}
                   {draft.choices && draft.choices.length > 2 && (
-                    <button
+                    <button type="button"
                       onClick={() => {
                         const newChoices = draft.choices?.filter((_, idx) => idx !== i);
                         const newCorrect = draft.correctAnswers?.filter(c => c !== choice);
@@ -383,7 +341,7 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
                   )}
                 </div>
               ))}
-              <button
+              <button type="button"
                 onClick={() => updateDraft({ choices: [...(draft.choices || []), ''] })}
                 className="text-xs text-arcium-blue hover:text-white uppercase tracking-widest"
               >
@@ -412,7 +370,7 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
               ) : draft.type === 'true_false' ? (
                 <div className="flex gap-2">
                   {(['true', 'false'] as const).map((val) => (
-                    <button
+                    <button type="button"
                       key={val}
                       onClick={() => updateDraft({ correctAnswer: val })}
                       className={`flex-1 py-2 px-4 rounded-sm text-sm font-bold uppercase tracking-widest transition-all ${
@@ -519,7 +477,7 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
                       placeholder={`Hint ${i + 1}`}
                     />
                     {(draft.hints || []).length > 1 && (
-                      <button
+                      <button type="button"
                         onClick={() => {
                           const current = draft.hints || [];
                           updateDraft({ hints: current.filter((_, idx) => idx !== i) });
@@ -531,7 +489,7 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
                     )}
                   </div>
                 ))}
-                <button
+                <button type="button"
                   onClick={() => updateDraft({ hints: [...(draft.hints || []), ''] })}
                   className="text-xs text-arcium-blue hover:text-white uppercase tracking-widest"
                 >
@@ -602,7 +560,7 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
           {/* Preview Toggle */}
           <div className="space-y-2 pt-2 border-t border-white/10">
             <div className="flex items-center gap-2 mb-2">
-              <button
+              <button type="button"
                 onClick={() => setPreviewMode('learner')}
                 className={`text-xs uppercase tracking-widest px-3 py-1 rounded-sm transition-colors ${
                   previewMode === 'learner' ? 'bg-arcium-blue text-black' : 'text-white/50 hover:text-white'
@@ -610,7 +568,7 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
               >
                 Learner View
               </button>
-              <button
+              <button type="button"
                 onClick={() => setPreviewMode('staff')}
                 className={`text-xs uppercase tracking-widest px-3 py-1 rounded-sm transition-colors ${
                   previewMode === 'staff' ? 'bg-arcium-blue text-black' : 'text-white/50 hover:text-white'
@@ -630,13 +588,13 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
 
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-2">
-            <button
+            <button type="button"
               onClick={cancelEditing}
               className="text-white/50 hover:text-white text-xs uppercase tracking-widest px-4 py-2"
             >
               Cancel
             </button>
-            <button
+            <button type="button"
               onClick={finalizeQuestion}
               disabled={!isValid()}
               className="bg-arcium-blue text-black px-6 py-2 rounded-sm font-bold uppercase tracking-widest text-xs hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -645,7 +603,14 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
             </button>
           </div>
         </div>
-      );
+    );
+  };
+
+  const renderQuestionCard = (question: QuizQuestion, index: number) => {
+    const isEditing = mode.type === 'editing' && mode.questionId === question.id;
+
+    if (isEditing && draft) {
+      return renderDraftForm(`Editing Question ${index + 1}`);
     }
 
     // Collapsed view
@@ -682,21 +647,21 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
           </div>
 
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
+            <button type="button"
               onClick={() => startEditing(question)}
               className="p-1.5 text-white/40 hover:text-arcium-blue transition-colors"
               title="Edit"
             >
               <Eye size={14} />
             </button>
-            <button
+            <button type="button"
               onClick={() => duplicateQuestion(question)}
               className="p-1.5 text-white/40 hover:text-arcium-blue transition-colors"
               title="Duplicate"
             >
               <Copy size={14} />
             </button>
-            <button
+            <button type="button"
               onClick={() => deleteQuestion(question.id)}
               className="p-1.5 text-white/40 hover:text-red-500 transition-colors"
               title="Delete"
@@ -721,42 +686,42 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
       {/* Question Type Buttons */}
       {mode.type === 'idle' && (
         <div className="flex flex-wrap gap-2">
-          <button
+          <button type="button"
             onClick={() => startCreating('short_text')}
             className="flex items-center gap-2 bg-white/5 hover:bg-arcium-blue hover:text-black text-white/70 px-4 py-2 rounded-sm transition-all text-xs uppercase tracking-widest font-bold border border-white/10 hover:border-arcium-blue"
           >
             <AlignLeft size={14} />
             Short Text
           </button>
-          <button
+          <button type="button"
             onClick={() => startCreating('long_text')}
             className="flex items-center gap-2 bg-white/5 hover:bg-arcium-blue hover:text-black text-white/70 px-4 py-2 rounded-sm transition-all text-xs uppercase tracking-widest font-bold border border-white/10 hover:border-arcium-blue"
           >
             <AlignJustify size={14} />
             Long Text
           </button>
-          <button
+          <button type="button"
             onClick={() => startCreating('multiple_choice')}
             className="flex items-center gap-2 bg-white/5 hover:bg-arcium-blue hover:text-black text-white/70 px-4 py-2 rounded-sm transition-all text-xs uppercase tracking-widest font-bold border border-white/10 hover:border-arcium-blue"
           >
             <ListOrdered size={14} />
             Multiple Choice
           </button>
-          <button
+          <button type="button"
             onClick={() => startCreating('checkbox')}
             className="flex items-center gap-2 bg-white/5 hover:bg-arcium-blue hover:text-black text-white/70 px-4 py-2 rounded-sm transition-all text-xs uppercase tracking-widest font-bold border border-white/10 hover:border-arcium-blue"
           >
             <CheckSquare size={14} />
             Checkbox
           </button>
-          <button
+          <button type="button"
             onClick={() => startCreating('true_false')}
             className="flex items-center gap-2 bg-white/5 hover:bg-arcium-blue hover:text-black text-white/70 px-4 py-2 rounded-sm transition-all text-xs uppercase tracking-widest font-bold border border-white/10 hover:border-arcium-blue"
           >
             <ToggleLeft size={14} />
             True/False
           </button>
-          <button
+          <button type="button"
             onClick={() => startCreating('code_fill_in')}
             className="flex items-center gap-2 bg-white/5 hover:bg-arcium-blue hover:text-black text-white/70 px-4 py-2 rounded-sm transition-all text-xs uppercase tracking-widest font-bold border border-white/10 hover:border-arcium-blue"
           >
@@ -768,6 +733,9 @@ export default function QuizBuilder({ initialQuestions, onChange }: QuizBuilderP
 
       {/* Question List */}
       <div className="space-y-3">
+        {mode.type === 'creating' && draft && (
+          <div key="quiz-draft-create">{renderDraftForm('New question')}</div>
+        )}
         {questions.map((q, i) => (
           <div key={q.id}>
             {renderQuestionCard(q, i)}

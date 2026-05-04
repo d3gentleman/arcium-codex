@@ -90,6 +90,9 @@ export default function TopAccountBar() {
               </span>
               <span>{summary?.progress?.completedLessons ?? 0}/{summary?.progress?.totalLessons ?? 0} lessons complete</span>
               <span>{summary?.progress?.commentCount ?? 0} comments</span>
+              <Link href="/account" className="text-outline transition-colors hover:text-primary">
+                Profile
+              </Link>
               {summary?.progress?.nextLesson ? (
                 <Link href={summary.progress.nextLesson.href} className="text-primary transition-colors hover:text-white">
                   Continue: {summary.progress.nextLesson.title}
@@ -122,6 +125,9 @@ export default function TopAccountBar() {
         <div className="flex shrink-0 items-center gap-3">
           {session?.user ? (
             <>
+              <Link href="/account" className="transition-colors hover:text-white">
+                Profile
+              </Link>
               <Link href="/modules" className="transition-colors hover:text-white">
                 Modules
               </Link>
