@@ -6,6 +6,7 @@ import { Trash2, Plus, ArrowLeft, Save } from "lucide-react";
 import { BodySection, QuizQuestion } from "@/types/domain";
 import Link from "next/link";
 import QuizBuilder from "@/components/staff/QuizBuilder";
+import { CldUploadWidget } from "next-cloudinary";
 
 type ModuleData = {
   slug?: string;
@@ -23,6 +24,10 @@ type ModuleData = {
 type Category = {
   id: string;
   title: string;
+};
+
+type CloudinaryUploadResultInfo = {
+  secure_url?: string;
 };
 
 const DEFAULT_CATEGORIES: Category[] = [
@@ -44,6 +49,7 @@ export default function ModuleForm({
 }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const categoriesList = categories && categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+  const cloudinaryUploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
   
   // Initialize with at least one section if creating new
   const [sections, setSections] = useState<BodySection[]>(
@@ -270,14 +276,66 @@ export default function ModuleForm({
                   <div className="space-y-8">
                     {/* Section x Image */}
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Section {index + 1} Image URL (Optional)</label>
-                      <input
-                        type="text"
-                        value={section.visual?.src || ""}
-                        onChange={(e) => updateSection(index, 'visual', { src: e.target.value })}
-                        placeholder="https://images.unsplash.com/..."
-                        className="w-full bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white text-sm font-mono"
-                      />
+                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Section {index + 1} Image (Optional)</label>
+                      <div className="space-y-3">
+                        <div className="flex gap-3">
+                          <CldUploadWidget
+                            signatureEndpoint="/api/cloudinary/sign"
+                            uploadPreset={cloudinaryUploadPreset}
+                            options={{
+                              multiple: false,
+                              maxFiles: 1,
+                              sources: ["local", "url", "camera"],
+                              resourceType: "image",
+                              folder: "staff/modules",
+                            }}
+                            onSuccess={(result) => {
+                              if (typeof result.info === "object" && result.info !== null) {
+                                const info = result.info as CloudinaryUploadResultInfo;
+                                if (info.secure_url) {
+                                  updateSection(index, "visual", { type: "image", src: info.secure_url });
+                                }
+                              }
+                            }}
+                          >
+                            {({ open }) => (
+                              <button
+                                type="button"
+                                onClick={() => open()}
+                                disabled={!cloudinaryUploadPreset}
+                                className="flex-1 bg-black border border-white/10 rounded-sm px-4 py-3 focus:outline-none focus:border-arcium-blue text-white text-sm font-mono hover:border-white/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {section.visual?.src ? "Replace image in Cloudinary" : "Upload image to Cloudinary"}
+                              </button>
+                            )}
+                          </CldUploadWidget>
+                          {section.visual?.src && (
+                            <button
+                              type="button"
+                              onClick={() => updateSection(index, "visual", { type: "image", src: "" })}
+                              className="bg-black border border-red-500/30 rounded-sm px-4 py-3 text-red-300 text-xs font-bold uppercase tracking-widest hover:bg-red-500/10 hover:border-red-400 transition-colors"
+                            >
+                              Remove Image
+                            </button>
+                          )}
+                        </div>
+                        {section.visual?.src ? (
+                          <div className="space-y-2">
+                            <img
+                              src={section.visual.src}
+                              alt={`Section ${index + 1} preview`}
+                              className="w-full max-h-48 object-cover rounded-sm border border-white/10"
+                            />
+                            <p className="text-xs text-white/50 break-all font-mono">{section.visual.src}</p>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-white/30">
+                            {cloudinaryUploadPreset
+                              ? "No image selected yet."
+                              : "Set NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET to enable uploads."}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
                     {/* Section x Heading */}
